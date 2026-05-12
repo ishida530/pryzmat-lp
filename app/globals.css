@@ -1,0 +1,25 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  html {
+    scroll-behavior: smooth;
+  }
+
+  body {
+    @apply antialiased text-gray-800;
+  }
+
+  /* Polish diacritics render correctly with Inter latin-ext subset */
+}
+
+@layer utilities {
+  .text-balance {
+    text-wrap: balance;
+  }
+
+  .section-label {
+    @apply text-brand-red text-xs font-bold tracking-widest uppercase;
+  }
+}
