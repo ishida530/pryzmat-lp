@@ -1,0 +1,218 @@
+
+<style>
+* { box-sizing: border-box; margin: 0; padding: 0; }
+body { font-family: 'Inter', sans-serif; }
+
+.mock { background: #fff; border: 0.5px solid var(--color-border-tertiary); border-radius: var(--border-radius-lg); overflow: hidden; }
+
+.nav { background: #1B3A6B; padding: 0 28px; height: 56px; display: flex; align-items: center; justify-content: space-between; }
+.nav-logo { display: flex; align-items: center; gap: 10px; }
+.logo-mark { width: 32px; height: 32px; }
+.logo-text { color: #fff; font-size: 15px; font-weight: 700; letter-spacing: 1px; }
+.logo-sub { color: #9fb8d8; font-size: 9px; letter-spacing: 2px; font-weight: 400; display: block; }
+.nav-links { display: flex; gap: 20px; align-items: center; }
+.nav-links span { color: #9fb8d8; font-size: 11px; cursor: pointer; }
+.nav-cta { background: #C0392B; color: #fff; padding: 6px 14px; border-radius: 4px; font-size: 11px; font-weight: 600; }
+
+.hero { background: #1B3A6B; padding: 40px 28px 36px; display: flex; gap: 24px; }
+.hero-left { flex: 1; }
+.hero-badge { background: rgba(192,57,43,0.25); color: #e8968e; font-size: 10px; letter-spacing: 1.5px; padding: 4px 10px; border-radius: 3px; display: inline-block; margin-bottom: 14px; }
+.hero-h1 { color: #fff; font-size: 22px; font-weight: 800; line-height: 1.25; margin-bottom: 10px; }
+.hero-h1 span { color: #4da3e8; }
+.hero-sub { color: #9fb8d8; font-size: 12px; line-height: 1.6; margin-bottom: 20px; max-width: 320px; }
+.hero-btns { display: flex; gap: 10px; flex-wrap: wrap; }
+.btn-primary { background: #C0392B; color: #fff; padding: 9px 18px; border-radius: 5px; font-size: 11px; font-weight: 700; }
+.btn-secondary { background: transparent; color: #fff; padding: 9px 18px; border-radius: 5px; font-size: 11px; font-weight: 600; border: 1.5px solid rgba(255,255,255,0.35); }
+.hero-right { width: 220px; flex-shrink: 0; }
+.hero-card { background: #fff; border-radius: 8px; padding: 16px; }
+.hc-title { color: #1B3A6B; font-size: 11px; font-weight: 700; margin-bottom: 12px; }
+.hc-row { display: flex; flex-direction: column; gap: 8px; }
+.hc-field { background: #f4f6f9; border-radius: 4px; padding: 8px 10px; font-size: 10px; color: #666; }
+.hc-select { background: #f4f6f9; border-radius: 4px; padding: 8px 10px; font-size: 10px; color: #999; display: flex; justify-content: space-between; }
+.hc-btn { background: #C0392B; color: #fff; border-radius: 4px; padding: 9px; font-size: 10px; font-weight: 700; text-align: center; margin-top: 4px; }
+.hc-note { font-size: 9px; color: #aaa; text-align: center; margin-top: 6px; }
+
+.trust-bar { background: #f0f4f9; padding: 10px 28px; display: flex; gap: 24px; align-items: center; border-bottom: 0.5px solid #dde4ef; }
+.trust-item { display: flex; align-items: center; gap: 6px; }
+.trust-item i { font-size: 14px; color: #1B3A6B; }
+.trust-item span { font-size: 10px; color: #444; font-weight: 500; }
+.trust-dot { color: #ccc; font-size: 16px; }
+
+.section { padding: 28px 28px; }
+.section-label { font-size: 10px; color: #C0392B; letter-spacing: 2px; font-weight: 700; text-transform: uppercase; margin-bottom: 4px; }
+.section-title { font-size: 17px; font-weight: 800; color: #1B3A6B; margin-bottom: 6px; }
+.section-sub { font-size: 11px; color: #666; margin-bottom: 20px; line-height: 1.5; }
+
+.services-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px; }
+.svc-card { border: 0.5px solid #dde4ef; border-radius: 8px; padding: 14px; background: #fff; }
+.svc-card.featured { border-color: #C0392B; border-width: 1.5px; }
+.svc-icon { width: 32px; height: 32px; background: #e8f0fa; border-radius: 6px; display: flex; align-items: center; justify-content: center; margin-bottom: 8px; }
+.svc-icon i { font-size: 16px; color: #1B3A6B; }
+.svc-card.featured .svc-icon { background: #fbe8e6; }
+.svc-card.featured .svc-icon i { color: #C0392B; }
+.svc-name { font-size: 11px; font-weight: 700; color: #1B3A6B; margin-bottom: 4px; }
+.svc-desc { font-size: 10px; color: #777; line-height: 1.45; }
+.svc-badge { font-size: 9px; background: #fbe8e6; color: #C0392B; padding: 2px 6px; border-radius: 3px; display: inline-block; margin-top: 6px; font-weight: 600; }
+
+.usp-section { background: #1B3A6B; padding: 28px; }
+.usp-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 12px; }
+.usp-item { text-align: center; }
+.usp-num { font-size: 26px; font-weight: 900; color: #fff; line-height: 1; }
+.usp-num span { font-size: 14px; color: #4da3e8; }
+.usp-label { font-size: 10px; color: #9fb8d8; margin-top: 4px; line-height: 1.3; }
+.usp-divider { width: 0.5px; background: rgba(255,255,255,0.15); }
+
+.najem-section { background: #f9f4f0; border-left: 3px solid #C0392B; border-radius: 0; padding: 24px 28px; display: flex; align-items: center; justify-content: space-between; gap: 16px; }
+.najem-left {}
+.najem-tag { font-size: 9px; color: #C0392B; letter-spacing: 2px; font-weight: 700; margin-bottom: 4px; }
+.najem-title { font-size: 14px; font-weight: 800; color: #1B3A6B; margin-bottom: 6px; }
+.najem-desc { font-size: 10px; color: #666; line-height: 1.5; max-width: 360px; }
+.najem-btn { background: #1B3A6B; color: #fff; padding: 10px 18px; border-radius: 5px; font-size: 11px; font-weight: 700; white-space: nowrap; flex-shrink: 0; }
+
+.footer { background: #0f2444; padding: 20px 28px; display: flex; justify-content: space-between; align-items: center; }
+.footer-logo { color: #fff; font-size: 13px; font-weight: 700; }
+.footer-sub { color: #5a7a9a; font-size: 10px; margin-top: 2px; }
+.footer-contact { text-align: right; }
+.footer-tel { color: #4da3e8; font-size: 13px; font-weight: 700; }
+.footer-addr { color: #5a7a9a; font-size: 10px; margin-top: 2px; }
+</style>
+
+<h2 class="sr-only">Makieta strony PRYZMAT Biuro Nieruchomości — poglądowy design</h2>
+
+<div class="mock">
+
+  <div class="nav">
+    <div class="nav-logo">
+      <svg class="logo-mark" viewBox="0 0 32 32" fill="none">
+        <polygon points="16,2 30,28 2,28" fill="none" stroke="#2E6EC5" stroke-width="3" stroke-linejoin="round"/>
+        <polygon points="16,10 24,26 8,26" fill="none" stroke="#C0392B" stroke-width="2.5" stroke-linejoin="round"/>
+      </svg>
+      <div>
+        <span class="logo-text">PRYZMAT</span>
+        <span class="logo-sub">BIURO NIERUCHOMOŚCI</span>
+      </div>
+    </div>
+    <div class="nav-links">
+      <span>Oferty</span>
+      <span>Usługi</span>
+      <span>Zarządzanie najmem</span>
+      <span>O nas</span>
+      <span class="nav-cta">Bezpłatna wycena</span>
+    </div>
+  </div>
+
+  <div class="hero">
+    <div class="hero-left">
+      <div class="hero-badge">BARCZEWO · OLSZTYN · WARMIA</div>
+      <h1 class="hero-h1">Sprzedaj, kup lub wynajmij<br><span>nieruchomość w Olsztynie</span><br>i okolicach</h1>
+      <p class="hero-sub">Rodzinne biuro z 11-letnim doświadczeniem. Znamy tutejszy rynek lepiej niż ktokolwiek inny — od Barczewa po Olsztyn.</p>
+      <div class="hero-btns">
+        <div class="btn-primary">Zobacz aktualne oferty</div>
+        <div class="btn-secondary">Bezpłatna wycena nieruchomości</div>
+      </div>
+    </div>
+    <div class="hero-right">
+      <div class="hero-card">
+        <div class="hc-title">Chcę zlecić sprzedaż / wynajem</div>
+        <div class="hc-row">
+          <div class="hc-field">Imię i telefon...</div>
+          <div class="hc-select">Rodzaj nieruchomości <span>▾</span></div>
+          <div class="hc-select">Sprzedaż / Wynajem / Zarządzanie <span>▾</span></div>
+          <div class="hc-btn">Umów bezpłatną wycenę →</div>
+          <div class="hc-note">Oddzwaniamy w ciągu 2 godzin · bez zobowiązań</div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="trust-bar">
+    <div class="trust-item"><i class="ti ti-shield-check" aria-hidden="true"></i><span>OC każdej transakcji</span></div>
+    <div class="trust-dot">·</div>
+    <div class="trust-item"><i class="ti ti-calendar" aria-hidden="true"></i><span>11 lat na rynku</span></div>
+    <div class="trust-dot">·</div>
+    <div class="trust-item"><i class="ti ti-currency-zloty" aria-hidden="true"></i><span>Bezpłatna pomoc kredytowa</span></div>
+    <div class="trust-dot">·</div>
+    <div class="trust-item"><i class="ti ti-map-pin" aria-hidden="true"></i><span>Barczewo · Olsztyn i okolice</span></div>
+  </div>
+
+  <div class="section">
+    <div class="section-label">Nasze usługi</div>
+    <div class="section-title">Co możemy dla Ciebie zrobić</div>
+    <div class="section-sub">Kompleksowa obsługa — od wyceny do aktu notarialnego.</div>
+    <div class="services-grid">
+      <div class="svc-card">
+        <div class="svc-icon"><i class="ti ti-home" aria-hidden="true"></i></div>
+        <div class="svc-name">Sprzedaż nieruchomości</div>
+        <div class="svc-desc">Mieszkania, domy, działki. Pełna obsługa transakcji od wyceny do podpisania aktu.</div>
+      </div>
+      <div class="svc-card">
+        <div class="svc-icon"><i class="ti ti-key" aria-hidden="true"></i></div>
+        <div class="svc-name">Wynajem mieszkań</div>
+        <div class="svc-desc">Pomagamy znaleźć najemcę lub wymarzone mieszkanie na wynajem w regionie.</div>
+      </div>
+      <div class="svc-card featured">
+        <div class="svc-icon"><i class="ti ti-building" aria-hidden="true"></i></div>
+        <div class="svc-name">Zarządzanie najmem</div>
+        <div class="svc-desc">Ty odpoczywasz — my zajmujemy się Twoim mieszkaniem, najemcami i płatnościami.</div>
+        <div class="svc-badge">Stały przychód bez stresu</div>
+      </div>
+      <div class="svc-card">
+        <div class="svc-icon"><i class="ti ti-tree" aria-hidden="true"></i></div>
+        <div class="svc-name">Działki i grunty</div>
+        <div class="svc-desc">Nieruchomości gruntowe, działki budowlane i rolno-budowlane w powiecie olsztyńskim.</div>
+      </div>
+      <div class="svc-card">
+        <div class="svc-icon"><i class="ti ti-credit-card" aria-hidden="true"></i></div>
+        <div class="svc-name">Pomoc kredytowa</div>
+        <div class="svc-desc">Bezpłatna analiza zdolności kredytowej przez naszych partnerów finansowych.</div>
+      </div>
+      <div class="svc-card">
+        <div class="svc-icon"><i class="ti ti-file-text" aria-hidden="true"></i></div>
+        <div class="svc-name">Obsługa dokumentów</div>
+        <div class="svc-desc">Przygotowujemy wszystkie dokumenty i towarzyszymy Ci na każdym etapie transakcji.</div>
+      </div>
+    </div>
+  </div>
+
+  <div class="usp-section">
+    <div class="usp-grid">
+      <div class="usp-item">
+        <div class="usp-num">11<span> lat</span></div>
+        <div class="usp-label">doświadczenia<br>na lokalnym rynku</div>
+      </div>
+      <div class="usp-item">
+        <div class="usp-num">100<span>%</span></div>
+        <div class="usp-label">transakcji<br>ubezpieczonych OC</div>
+      </div>
+      <div class="usp-item">
+        <div class="usp-num">2<span>,5%</span></div>
+        <div class="usp-label">prowizja<br>uczciwa i przejrzysta</div>
+      </div>
+      <div class="usp-item">
+        <div class="usp-num">0<span> zł</span></div>
+        <div class="usp-label">pomoc kredytowa<br>dla klientów biura</div>
+      </div>
+    </div>
+  </div>
+
+  <div class="najem-section">
+    <div class="najem-left">
+      <div class="najem-tag">DLA WŁAŚCICIELI MIESZKAŃ</div>
+      <div class="najem-title">Masz mieszkanie do wynajęcia? Zajmiemy się wszystkim.</div>
+      <div class="najem-desc">Zarządzamy najmem w Twoim imieniu — szukamy najemców, pilnujemy płatności, reagujemy na awarie. Ty dostajesz przelew co miesiąc.</div>
+    </div>
+    <div class="najem-btn">Dowiedz się więcej →</div>
+  </div>
+
+  <div class="footer">
+    <div>
+      <div class="footer-logo">PRYZMAT Biuro Nieruchomości</div>
+      <div class="footer-sub">Barczewko 126B, 11-010 Barczewo · biuro@marzdom.pl</div>
+    </div>
+    <div class="footer-contact">
+      <div class="footer-tel">503 397 360</div>
+      <div class="footer-addr">Pon–Pt: 9:00–18:00 · Sob: umówienie</div>
+    </div>
+  </div>
+
+</div>
