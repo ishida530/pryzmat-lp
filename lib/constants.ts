@@ -22,7 +22,7 @@ export const COMPANY = {
     sunday: "Niedz: zamknięte",
   },
   social: {
-    facebook: "https://facebook.com/pryzmatnieruchomosci", // REPLACE with actual URL
+    facebook: "https://www.facebook.com/profile.php?id=100063543072260", // REPLACE with actual URL
   },
   areaServed: ["Barczewo", "Olsztyn", "powiat olsztyński"],
   foundingYear,
