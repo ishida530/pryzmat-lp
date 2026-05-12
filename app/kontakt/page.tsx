@@ -1,5 +1,6 @@
 import type { Metadata } from "next";
 import { createMetadata } from "@/lib/seo";
+import Image from "next/image";
 import { Suspense } from "react";
 import { ContactPageForm } from "@/components/forms/ContactPageForm";
 import { COMPANY } from "@/lib/constants";
@@ -41,8 +42,18 @@ export default function KontaktPage() {
       />
 
       {/* Header */}
-      <section className="bg-brand-navy py-16">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+      {/* REPLACE src with actual office/building photo */}
+      <section className="relative overflow-hidden py-16 lg:py-24">
+        <Image
+          src="https://images.unsplash.com/photo-1497366216548-37526070297c?auto=format&fit=crop&w=1920&q=80"
+          alt="Biuro Nieruchomości PRYZMAT — kontakt"
+          fill
+          className="object-cover object-center"
+          priority
+          sizes="100vw"
+        />
+        <div className="absolute inset-0 bg-brand-dark-navy/88" />
+        <div className="relative z-10 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <p className="text-brand-red text-xs font-bold tracking-widest uppercase mb-3">
             KONTAKT
           </p>

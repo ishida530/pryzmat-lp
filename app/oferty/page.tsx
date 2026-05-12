@@ -2,6 +2,7 @@
 
 import type { Metadata } from "next";
 import { createMetadata } from "@/lib/seo";
+import Image from "next/image";
 import { OffersClient, type Offer } from "@/components/sections/OffersClient";
 
 export const metadata: Metadata = createMetadata(
@@ -79,8 +80,18 @@ export default function OfertyPage() {
     <div className="min-h-screen bg-gray-50">
 
       {/* Page header */}
-      <div className="bg-brand-navy py-14">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+      {/* REPLACE src with actual property/neighborhood photo */}
+      <div className="relative overflow-hidden py-14 lg:py-20">
+        <Image
+          src="https://images.unsplash.com/photo-1570129477492-45c003edd2be?auto=format&fit=crop&w=1920&q=80"
+          alt="Oferty nieruchomości Barczewo i Olsztyn"
+          fill
+          className="object-cover object-center"
+          priority
+          sizes="100vw"
+        />
+        <div className="absolute inset-0 bg-brand-dark-navy/88" />
+        <div className="relative z-10 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <p className="text-brand-red text-xs font-bold tracking-widest uppercase mb-3">
             OFERTY
           </p>

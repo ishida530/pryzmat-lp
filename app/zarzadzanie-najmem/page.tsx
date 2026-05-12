@@ -1,5 +1,6 @@
 import type { Metadata } from "next";
 import { createMetadata } from "@/lib/seo";
+import Image from "next/image";
 import Link from "next/link";
 import {
   CheckCircle2,
@@ -103,12 +104,22 @@ export default function ZarzadzanieNajmemPage() {
       />
 
       {/* Hero */}
-      <section className="relative bg-brand-navy overflow-hidden py-20 lg:py-28">
+      {/* REPLACE src with actual apartment/property photo */}
+      <section className="relative overflow-hidden py-20 lg:py-28">
+        <Image
+          src="https://images.unsplash.com/photo-1522708323590-d24dbb6b0267?auto=format&fit=crop&w=1920&q=80"
+          alt="Zarządzanie najmem nieruchomości Barczewo i Olsztyn"
+          fill
+          className="object-cover object-center"
+          priority
+          sizes="100vw"
+        />
+        <div className="absolute inset-0 bg-brand-dark-navy/90" />
         <div
           className="absolute inset-0 pointer-events-none"
           style={{
             background:
-              "radial-gradient(ellipse 60% 80% at 80% 50%, rgba(46,110,197,0.15) 0%, transparent 70%)",
+              "radial-gradient(ellipse 60% 80% at 80% 50%, rgba(46,110,197,0.18) 0%, transparent 70%)",
           }}
         />
         <div className="relative max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
