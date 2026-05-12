@@ -6,13 +6,20 @@ import { SlidersHorizontal, Search, MapPin, Home, ArrowRight } from "lucide-reac
 
 export interface Offer {
   id: number;
+  slug: string;
   type: string;
   title: string;
+  description: string;
   location: string;
+  address?: string;
   price: number;
   area: number;
   unit: string;
   purpose: "sprzedaz" | "wynajem";
+  rooms?: number;
+  bathrooms?: number;
+  features?: string[];
+  imageUrl?: string;
 }
 
 const typeOptions = ["Wszystkie", "Mieszkanie", "Dom", "Działka"];
@@ -139,12 +146,20 @@ export function OffersClient({ offers }: { offers: Offer[] }) {
           {filtered.map((offer) => (
             <Link
               key={offer.id}
-              href={`/kontakt?cel=kupno&oferta=${encodeURIComponent(offer.title)}`}
+              href={`/oferty/${offer.slug}`}
               className="bg-white rounded-xl border border-gray-100 shadow-sm hover:shadow-md hover:-translate-y-1 transition-all duration-200 overflow-hidden group"
             >
               {/* Image placeholder */}
-              <div className="h-44 bg-gradient-to-br from-brand-navy/10 to-brand-blue/10 flex items-center justify-center relative">
-                <Home className="w-10 h-10 text-brand-navy/30" />
+              <div className="h-44 bg-gradient-to-br from-brand-navy/10 to-brand-blue/10 flex items-center justify-center relative overflow-hidden">
+                {offer.imageUrl ? (
+                  <img 
+                    src={offer.imageUrl} 
+                    alt={offer.title}
+                    className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-300"
+                  />
+                ) : (
+                  <Home className="w-10 h-10 text-brand-navy/30" />
+                )}
                 <span className="absolute top-3 left-3 bg-brand-navy text-white text-[11px] font-bold px-2.5 py-1 rounded-full">
                   {offer.type}
                 </span>
