@@ -1,6 +1,7 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
+import { useSearchParams } from "next/navigation";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { Phone, Mail, MapPin, Clock, CheckCircle2, MessageSquare } from "lucide-react";
@@ -12,19 +13,41 @@ import { COMPANY } from "@/lib/constants";
 const inputClass =
   "w-full border border-gray-200 rounded-lg px-4 py-3 text-sm focus:outline-none focus:ring-2 focus:ring-brand-blue focus:border-transparent placeholder-gray-400 transition bg-white";
 
+function paramToSzukasz(cel: string | null, wycena: string | null): ContactFormData["szukasz"] | "" {
+  if (cel === "zarzadzanie") return "zarzadzanie";
+  if (cel === "kupno") return "kupno";
+  if (cel === "sprzedaz" || wycena === "1") return "sprzedaz";
+  if (cel === "wynajem") return "wynajem";
+  return "";
+}
+
 export function ContactPageForm() {
+  const searchParams = useSearchParams();
   const [submitted, setSubmitted] = useState(false);
   const [loading, setLoading] = useState(false);
   const [serverError, setServerError] = useState("");
+
+  const defaultSzukasz = paramToSzukasz(
+    searchParams.get("cel"),
+    searchParams.get("wycena")
+  );
 
   const {
     register,
     handleSubmit,
     formState: { errors },
     reset,
+    setValue,
   } = useForm<ContactFormData>({
     resolver: zodResolver(contactFormSchema),
   });
+
+  // Apply URL-driven pre-fill after mount (avoids hydration mismatch)
+  useEffect(() => {
+    if (defaultSzukasz) {
+      setValue("szukasz", defaultSzukasz);
+    }
+  }, [defaultSzukasz, setValue]);
 
   async function onSubmit(data: ContactFormData) {
     setLoading(true);
@@ -122,7 +145,7 @@ export function ContactPageForm() {
             <div>
               <select
                 {...register("szukasz")}
-                defaultValue=""
+                defaultValue={defaultSzukasz || ""}
                 className={`${inputClass} text-gray-700`}
               >
                 <option value="" disabled>Czego szukasz? *</option>
@@ -158,7 +181,7 @@ export function ContactPageForm() {
 
             <p className="text-gray-400 text-xs text-center">
               Dane są przetwarzane zgodnie z{" "}
-              <a href="/rodo" className="underline hover:text-gray-600">polityką prywatności</a>.
+              <a href="/rodo" className="underline hover:text-gray-600">klauzulą RODO</a>.
             </p>
           </form>
         )}
