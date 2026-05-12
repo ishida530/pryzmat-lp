@@ -6,6 +6,7 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import { Phone, Mail, MapPin, Clock, CheckCircle2 } from "lucide-react";
 import { contactFormSchema, type ContactFormData } from "@/lib/schemas";
 import { COMPANY } from "@/lib/constants";
+import { useInView } from "@/hooks/useInView";
 
 // FAZA 3: Add AI chat button here
 
@@ -48,11 +49,16 @@ export function Contact() {
   const inputClass =
     "w-full border border-gray-200 rounded-lg px-4 py-3 text-sm focus:outline-none focus:ring-2 focus:ring-brand-blue focus:border-transparent placeholder-gray-400 transition";
 
+  const { ref, inView } = useInView(0.1);
+
   return (
-    <section id="kontakt" className="py-20 lg:py-28 bg-brand-light-blue">
+    <section ref={ref} id="kontakt" className="py-20 lg:py-28 bg-brand-light-blue">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
 
-        <div className="text-center mb-14">
+        <div
+          className={`text-center mb-14 ${inView ? "animate-fade-up" : "opacity-0"}`}
+          style={inView ? { animationDelay: "0ms" } : undefined}
+        >
           <p className="section-label mb-3">KONTAKT</p>
           <h2 className="text-3xl lg:text-4xl font-extrabold text-brand-navy">
             Skontaktuj się z nami
@@ -65,7 +71,10 @@ export function Contact() {
         <div className="grid lg:grid-cols-2 gap-12">
 
           {/* Form */}
-          <div className="bg-white rounded-2xl shadow-sm border border-gray-100 p-8">
+          <div
+            className={`bg-white rounded-2xl shadow-sm border border-gray-100 p-8 ${inView ? "animate-fade-up" : "opacity-0"}`}
+            style={inView ? { animationDelay: "100ms" } : undefined}
+          >
             {submitted ? (
               <div className="flex flex-col items-center justify-center py-12 text-center">
                 <CheckCircle2 className="w-14 h-14 text-green-500 mb-4" />
@@ -179,7 +188,10 @@ export function Contact() {
           </div>
 
           {/* Address card */}
-          <div className="space-y-6">
+          <div
+            className={`space-y-6 ${inView ? "animate-fade-up" : "opacity-0"}`}
+            style={inView ? { animationDelay: "200ms" } : undefined}
+          >
 
             <div className="bg-white rounded-2xl shadow-sm border border-gray-100 p-8 space-y-5">
               <h3 className="font-bold text-brand-navy text-lg">

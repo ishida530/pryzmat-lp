@@ -140,7 +140,7 @@ export function OffersClient({ offers }: { offers: Offer[] }) {
             <Link
               key={offer.id}
               href={`/kontakt?cel=kupno&oferta=${encodeURIComponent(offer.title)}`}
-              className="bg-white rounded-xl border border-gray-100 shadow-sm hover:shadow-md transition-shadow overflow-hidden group"
+              className="bg-white rounded-xl border border-gray-100 shadow-sm hover:shadow-md hover:-translate-y-1 transition-all duration-200 overflow-hidden group"
             >
               {/* Image placeholder */}
               <div className="h-44 bg-gradient-to-br from-brand-navy/10 to-brand-blue/10 flex items-center justify-center relative">

@@ -1,3 +1,4 @@
+"use client";
 import {
   Home,
   KeyRound,
@@ -7,8 +8,7 @@ import {
   FileText,
 } from "lucide-react";
 import Link from "next/link";
-
-// FAZA 2: Cards will link to filtered offers from ASARI API
+import { useInView } from "@/hooks/useInView";
 
 interface Service {
   Icon: React.ComponentType<{ className?: string }>;
@@ -65,12 +65,17 @@ const services: Service[] = [
 ];
 
 export function Services() {
+  const { ref, inView } = useInView(0.08);
+
   return (
-    <section id="uslugi" className="py-20 lg:py-28 bg-white">
+    <section ref={ref} id="uslugi" className="py-20 lg:py-28 bg-white">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
 
         {/* Header */}
-        <div className="text-center mb-14">
+        <div
+          className={`text-center mb-14 ${inView ? "animate-fade-up" : "opacity-0"}`}
+          style={inView ? { animationDelay: "0ms" } : undefined}
+        >
           <p className="section-label mb-3">NASZE USŁUGI</p>
           <h2 className="text-3xl lg:text-4xl font-extrabold text-brand-navy">
             Co możemy dla Ciebie zrobić
@@ -84,16 +89,20 @@ export function Services() {
         {/* Cards grid */}
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
           {services.map(
-            ({ Icon, title, description, featured, badge, href }) => {
+            ({ Icon, title, description, featured, badge, href }, index) => {
               const card = (
                 <div
-                  className={`relative bg-white rounded-xl p-6 border transition-all duration-200 hover:shadow-md group ${
+                  className={`relative bg-white rounded-xl p-6 border transition-all duration-200 hover:shadow-lg hover:-translate-y-1 group ${
                     featured
                       ? "border-brand-red shadow-md ring-1 ring-brand-red/20"
                       : "border-gray-100 shadow-sm"
-                  }`}
+                  } ${inView ? "animate-fade-up" : "opacity-0"}`}
+                  style={
+                    inView
+                      ? { animationDelay: `${index * 75 + 100}ms` }
+                      : undefined
+                  }
                 >
-                  {/* Featured badge */}
                   {badge && (
                     <span className="absolute -top-3 left-5 bg-brand-red text-white text-[11px] font-bold px-3 py-1 rounded-full">
                       {badge}
@@ -101,10 +110,8 @@ export function Services() {
                   )}
 
                   <div
-                    className={`w-12 h-12 rounded-xl flex items-center justify-center mb-4 ${
-                      featured
-                        ? "bg-brand-red/10"
-                        : "bg-brand-light-blue"
+                    className={`w-12 h-12 rounded-xl flex items-center justify-center mb-4 transition-transform duration-200 ${
+                      featured ? "bg-brand-red/10" : "bg-brand-light-blue"
                     }`}
                   >
                     <Icon

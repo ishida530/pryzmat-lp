@@ -4,6 +4,7 @@ import { TrustBar } from "@/components/sections/TrustBar";
 import { Services } from "@/components/sections/Services";
 import { Stats } from "@/components/sections/Stats";
 import { NajemCTA } from "@/components/sections/NajemCTA";
+import { AnimateIn } from "@/components/ui/AnimateIn";
 import { About } from "@/components/sections/About";
 import { Testimonials } from "@/components/sections/Testimonials";
 import { Contact } from "@/components/sections/Contact";
@@ -84,7 +85,9 @@ export default function HomePage() {
       <TrustBar />
       <Services />
       <Stats />
-      <NajemCTA />
+      <AnimateIn animation="fade-in" threshold={0.08}>
+        <NajemCTA />
+      </AnimateIn>
       <About />
       <Testimonials />
       <Contact />

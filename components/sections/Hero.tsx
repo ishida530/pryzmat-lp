@@ -75,18 +75,27 @@ export function Hero() {
           <div className="lg:col-span-3 space-y-7 order-1 lg:order-1">
 
             {/* Badge */}
-            <div className="inline-flex items-center gap-2 border border-brand-red/40 bg-brand-red/10 text-brand-red px-4 py-1.5 rounded-full text-[11px] font-bold tracking-widest uppercase">
+            <div
+              className="inline-flex items-center gap-2 border border-brand-red/40 bg-brand-red/10 text-brand-red px-4 py-1.5 rounded-full text-[11px] font-bold tracking-widest uppercase animate-fade-up"
+              style={{ animationDelay: "0ms" }}
+            >
               BARCZEWO · OLSZTYN · WARMIA
             </div>
 
             {/* H1 — contains SEO keyword */}
-            <h1 className="text-4xl md:text-5xl lg:text-[52px] font-extrabold text-white leading-[1.15] tracking-tight text-balance">
+            <h1
+              className="text-4xl md:text-5xl lg:text-[52px] font-extrabold text-white leading-[1.15] tracking-tight text-balance animate-fade-up"
+              style={{ animationDelay: "120ms" }}
+            >
               Sprzedaj, kup lub wynajmij{" "}
               <span className="text-blue-300">nieruchomość</span>{" "}
               w&nbsp;Olsztynie i&nbsp;okolicach
             </h1>
 
-            <p className="text-gray-300 text-lg leading-relaxed max-w-xl">
+            <p
+              className="text-gray-300 text-lg leading-relaxed max-w-xl animate-fade-up"
+              style={{ animationDelay: "220ms" }}
+            >
               Rodzinne{" "}
               <strong className="text-white">
                 biuro nieruchomości Barczewo
@@ -100,7 +109,10 @@ export function Hero() {
             </p>
 
             {/* CTAs */}
-            <div className="flex flex-col sm:flex-row gap-4">
+            <div
+              className="flex flex-col sm:flex-row gap-4 animate-fade-up"
+              style={{ animationDelay: "360ms" }}
+            >
               <Link
                 href="/oferty"
                 className="inline-flex items-center justify-center bg-brand-red text-white px-8 py-4 rounded-lg text-base font-bold hover:bg-red-700 transition-colors"
@@ -116,7 +128,10 @@ export function Hero() {
             </div>
 
             {/* Social proof */}
-            <div className="flex items-center gap-3 pt-1">
+            <div
+              className="flex items-center gap-3 pt-1 animate-fade-up"
+              style={{ animationDelay: "480ms" }}
+            >
               <div className="flex">
                 {[0, 1, 2, 3, 4].map((i) => (
                   <svg
@@ -136,7 +151,10 @@ export function Hero() {
           </div>
 
           {/* ── Right column: 2/5 — lead card ── */}
-          <div className="lg:col-span-2 order-2 lg:order-2">
+          <div
+            className="lg:col-span-2 order-2 lg:order-2 animate-fade-in"
+            style={{ animationDelay: "300ms" }}
+          >
             {/* FAZA 3: Replace this card with AI chatbot widget */}
             <div className="bg-white rounded-2xl shadow-2xl p-7 lg:p-8">
                 {submitted ? (

@@ -1,4 +1,6 @@
+"use client";
 // FAZA 4: Pull from Google Reviews API
+import { useInView } from "@/hooks/useInView";
 
 const testimonials = [
   {
@@ -42,11 +44,16 @@ function StarRating({ count }: { count: number }) {
 }
 
 export function Testimonials() {
+  const { ref, inView } = useInView(0.1);
+
   return (
-    <section className="py-20 lg:py-28 bg-white">
+    <section ref={ref} className="py-20 lg:py-28 bg-white">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
 
-        <div className="text-center mb-14">
+        <div
+          className={`text-center mb-14 ${inView ? "animate-fade-up" : "opacity-0"}`}
+          style={inView ? { animationDelay: "0ms" } : undefined}
+        >
           <p className="section-label mb-3">OPINIE KLIENTÓW</p>
           <h2 className="text-3xl lg:text-4xl font-extrabold text-brand-navy">
             Co mówią nasi klienci
@@ -55,10 +62,11 @@ export function Testimonials() {
         </div>
 
         <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-          {testimonials.map(({ name, location, rating, text, context }) => (
+          {testimonials.map(({ name, location, rating, text, context }, i) => (
             <div
               key={name}
-              className="bg-brand-light-blue rounded-2xl p-7 border border-blue-100 relative"
+              className={`bg-brand-light-blue rounded-2xl p-7 border border-blue-100 relative ${inView ? "animate-fade-up" : "opacity-0"}`}
+              style={inView ? { animationDelay: `${i * 120 + 100}ms` } : undefined}
             >
               {/* Quote mark */}
               <div className="absolute top-5 right-6 text-brand-blue/20 text-7xl font-serif leading-none select-none">
