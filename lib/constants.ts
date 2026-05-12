@@ -14,12 +14,12 @@ export const COMPANY = {
   },
   phone: "+48503397360",
   phoneDisplay: "+48 503 397 360",
-  email: "biuro@pryzmat.com.pl", // REPLACE with actual email
-  website: "https://pryzmat.com.pl", // REPLACE with actual domain
+  email: "biuro@marzdom.pl", // REPLACE with actual email
+  website: "https://www.pryzmatnieruchomosci.pl/", // REPLACE with actual domain
   hours: {
-    weekdays: "Pon–Pt: 9:00–17:00",
-    saturday: "Sob: 10:00–14:00",
-    sunday: "Niedz: zamknięte",
+    weekdays: "Pon–Pt: 9:00–20:00",
+    saturday: "Sob: 10:00–15:00",
+    sunday: "Niedz: 9:00-16:00",
   },
   social: {
     facebook: "https://www.facebook.com/profile.php?id=100063543072260", // REPLACE with actual URL
