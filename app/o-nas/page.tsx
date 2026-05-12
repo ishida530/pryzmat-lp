@@ -65,7 +65,7 @@ const values = [
 
 const teamMembers = [
   {
-    name: "Jerzy",
+    name: "Jerzy Sawczuk",
     role: "Założyciel i agent nieruchomości",
     bio: "Ponad 11 lat na rynku nieruchomości Warmii i Mazur. Specjalista od wycen i negocjacji. Zna każdy zakamarek Barczewa i Olsztyna.",
     photoPlaceholder: true,
@@ -85,8 +85,8 @@ export default function ONasPage() {
       {/* REPLACE src with actual office/team photo */}
       <section className="relative overflow-hidden py-20 lg:py-28">
         <Image
-          src="https://images.unsplash.com/photo-1560472354-b33ff0c44a43?auto=format&fit=crop&w=1920&q=80"
-          alt="Biuro Nieruchomości PRYZMAT — zespół"
+          src="https://images.unsplash.com/photo-1560518883-ce09059eeffa?auto=format&fit=crop&w=1920&q=80"
+          alt="Biuro Nieruchomości PRYZMAT — sprzedaż i wynajem nieruchomości"
           fill
           className="object-cover object-center"
           priority

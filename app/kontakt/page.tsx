@@ -45,7 +45,7 @@ export default function KontaktPage() {
       {/* REPLACE src with actual office/building photo */}
       <section className="relative overflow-hidden py-16 lg:py-24">
         <Image
-          src="https://images.unsplash.com/photo-1497366216548-37526070297c?auto=format&fit=crop&w=1920&q=80"
+          src="https://images.unsplash.com/photo-1556761175-5973dc0f32e7?auto=format&fit=crop&w=1920&q=80"
           alt="Biuro Nieruchomości PRYZMAT — kontakt"
           fill
           className="object-cover object-center"
