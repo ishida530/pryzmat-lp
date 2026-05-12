@@ -1,3 +1,5 @@
+const foundingYear = 2013;
+
 export const COMPANY = {
   name: "Biuro Nieruchomości PRYZMAT",
   shortName: "PRYZMAT",
@@ -23,14 +25,15 @@ export const COMPANY = {
     facebook: "https://facebook.com/pryzmatnieruchomosci", // REPLACE with actual URL
   },
   areaServed: ["Barczewo", "Olsztyn", "powiat olsztyński"],
-  yearsActive: 11,
+  foundingYear,
+  yearsActive: new Date().getFullYear() - foundingYear,
   commission: "2,5%",
   stats: [
-    { value: "11 lat", label: "doświadczenia na lokalnym rynku" },
+    { value: `${new Date().getFullYear() - foundingYear} lat`, label: "doświadczenia na lokalnym rynku" },
     { value: "100%", label: "transakcji ubezpieczonych OC" },
     { value: "2,5%", label: "prowizja uczciwa i przejrzysta" },
     { value: "0 zł", label: "pomoc kredytowa dla klientów" },
   ],
-} as const;
+};
 
 export type CompanyData = typeof COMPANY;

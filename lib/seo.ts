@@ -9,7 +9,7 @@ export function createMetadata(
   const url = `${COMPANY.website}${path}`;
   const fullTitle = `${title} | ${COMPANY.shortName}`;
   const ogImage = {
-    url: `${COMPANY.website}/og-image.jpg`,
+    url: `${COMPANY.website}/opengraph-image`,
     width: 1200,
     height: 630,
     alt: `${title} — ${COMPANY.name}`,
