@@ -1,4 +1,5 @@
 import { Shield, Calendar, CreditCard, MapPin } from "lucide-react";
+import { COMPANY } from "@/lib/constants";
 
 const trustItems = [
   {
@@ -8,8 +9,8 @@ const trustItems = [
   },
   {
     Icon: Calendar,
-    label: "11 lat na rynku",
-    detail: "Doświadczenie od 2013 roku",
+    label: `${COMPANY.yearsActive} lat na rynku`,
+    detail: `Doświadczenie od ${COMPANY.foundingYear} roku`,
   },
   {
     Icon: CreditCard,

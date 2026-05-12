@@ -5,10 +5,44 @@ import { Award, Users, MapPin, Phone } from "lucide-react";
 import { COMPANY } from "@/lib/constants";
 
 export const metadata: Metadata = createMetadata(
-  "O nas — rodzinne biuro nieruchomości Barczewo",
-  "Poznaj biuro nieruchomości PRYZMAT w Barczewie. Rodzinna firma z 11-letnim doświadczeniem na rynku Olsztyna i Warmii.",
+  "O nas — rodzinne biuro nieruchomości Barczewo i Olsztyn",
+  `Poznaj biuro nieruchomości PRYZMAT w Barczewie. Rodzinna firma z ${COMPANY.yearsActive}-letnim doświadczeniem na rynku Olsztyna i Warmii.`,
   "/o-nas"
 );
+
+const aboutPageSchema = [
+  {
+    "@context": "https://schema.org",
+    "@type": "AboutPage",
+    name: "O nas — Biuro Nieruchomości PRYZMAT Barczewo i Olsztyn",
+    description: `Rodzinne biuro nieruchomości z ${COMPANY.yearsActive}-letnim doświadczeniem w Barczewie i Olsztynie. Sprzedaż, wynajem i zarządzanie nieruchomościami.`,
+    url: `${COMPANY.website}/o-nas`,
+    mainEntity: {
+      "@type": "LocalBusiness",
+      name: COMPANY.name,
+      foundingDate: String(COMPANY.foundingYear),
+      url: COMPANY.website,
+    },
+  },
+  {
+    "@context": "https://schema.org",
+    "@type": "Person",
+    name: "Jerzy",
+    jobTitle: "Założyciel i agent nieruchomości",
+    worksFor: {
+      "@type": "Organization",
+      name: COMPANY.name,
+      url: COMPANY.website,
+    },
+    knowsAbout: [
+      "nieruchomości Barczewo",
+      "nieruchomości Olsztyn",
+      "zarządzanie najmem",
+      "wycena nieruchomości",
+    ],
+    areaServed: "Barczewo, Olsztyn, powiat olsztyński",
+  },
+];
 
 const values = [
   {
@@ -41,6 +75,10 @@ const teamMembers = [
 export default function ONasPage() {
   return (
     <div>
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{ __html: JSON.stringify(aboutPageSchema) }}
+      />
 
       {/* Header */}
       <section className="bg-brand-navy py-20">
@@ -49,7 +87,8 @@ export default function ONasPage() {
             O NAS
           </p>
           <h1 className="text-4xl lg:text-5xl font-extrabold text-white mb-4">
-            Rodzinne biuro z pasją do&nbsp;nieruchomości
+            Rodzinne biuro nieruchomości{" "}
+            <span className="text-blue-300">Barczewo i Olsztyn</span>
           </h1>
           <p className="text-gray-300 text-lg max-w-xl">
             {COMPANY.yearsActive} lat obsługi klientów na terenie Barczewa,

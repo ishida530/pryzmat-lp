@@ -2,11 +2,14 @@ import type { Metadata } from "next";
 import { createMetadata } from "@/lib/seo";
 import { COMPANY } from "@/lib/constants";
 
-export const metadata: Metadata = createMetadata(
-  "Polityka prywatności",
-  "Polityka prywatności Biura Nieruchomości PRYZMAT. Informacje o przetwarzaniu danych osobowych zgodnie z RODO.",
-  "/polityka-prywatnosci"
-);
+export const metadata: Metadata = {
+  ...createMetadata(
+    "Polityka prywatności",
+    "Polityka prywatności Biura Nieruchomości PRYZMAT. Informacje o przetwarzaniu danych osobowych zgodnie z RODO.",
+    "/polityka-prywatnosci"
+  ),
+  robots: { index: false, follow: false },
+};
 
 export default function PolitykaPrywatnosci() {
   return (
@@ -26,7 +29,7 @@ export default function PolitykaPrywatnosci() {
       </section>
 
       <section className="py-16 bg-white">
-        <div className="max-w-3xl mx-auto px-4 sm:px-6 lg:px-8 prose prose-gray max-w-none">
+        <div className="max-w-3xl mx-auto px-4 sm:px-6 lg:px-8 prose prose-gray">
           <h2 className="text-xl font-bold text-brand-navy mt-8 mb-4">
             1. Administrator danych
           </h2>

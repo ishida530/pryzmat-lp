@@ -1,6 +1,5 @@
 import type { Metadata } from "next";
 import { createMetadata } from "@/lib/seo";
-import Image from "next/image";
 import Link from "next/link";
 import {
   CheckCircle2,
@@ -19,6 +18,44 @@ export const metadata: Metadata = createMetadata(
   "Zarządzamy mieszkaniem w Twoim imieniu — najemcy, płatności, awarie. Regularny przelew co miesiąc. Prowizja 2,5%. Bezpłatna konsultacja.",
   "/zarzadzanie-najmem"
 );
+
+const serviceSchema = {
+  "@context": "https://schema.org",
+  "@type": "Service",
+  serviceType: "Zarządzanie nieruchomościami",
+  name: "Zarządzanie najmem — Biuro Nieruchomości PRYZMAT",
+  description:
+    "Kompleksowe zarządzanie najmem nieruchomości: weryfikacja najemców, obsługa płatności, reakcja na awarie, miesięczne rozliczenia. Barczewo, Olsztyn i powiat olsztyński.",
+  provider: {
+    "@type": "LocalBusiness",
+    name: "Biuro Nieruchomości PRYZMAT",
+    url: "https://pryzmat.com.pl",
+    telephone: "+48503397360",
+    address: {
+      "@type": "PostalAddress",
+      streetAddress: "Barczewko 126B",
+      addressLocality: "Barczewo",
+      postalCode: "11-010",
+      addressCountry: "PL",
+    },
+  },
+  areaServed: [
+    { "@type": "City", name: "Barczewo" },
+    { "@type": "City", name: "Olsztyn" },
+    { "@type": "AdministrativeArea", name: "powiat olsztyński" },
+  ],
+  offers: {
+    "@type": "Offer",
+    priceSpecification: {
+      "@type": "UnitPriceSpecification",
+      price: "2.5",
+      priceCurrency: "PLN",
+      unitText: "% miesięcznego czynszu",
+    },
+    availability: "https://schema.org/InStock",
+  },
+  url: "https://pryzmat.com.pl/zarzadzanie-najmem",
+};
 
 const steps = [
   {
@@ -60,6 +97,10 @@ const benefits = [
 export default function ZarzadzanieNajmemPage() {
   return (
     <div>
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{ __html: JSON.stringify(serviceSchema) }}
+      />
 
       {/* Hero */}
       <section className="relative bg-brand-navy overflow-hidden py-20 lg:py-28">
@@ -77,7 +118,7 @@ export default function ZarzadzanieNajmemPage() {
             </p>
             <h1 className="text-4xl lg:text-5xl font-extrabold text-white leading-tight mb-6">
               Zarządzanie najmem{" "}
-              <span className="text-brand-blue">Olsztyn</span> i okolice
+              <span className="text-brand-blue">Barczewo i Olsztyn</span>
             </h1>
             <p className="text-gray-300 text-lg leading-relaxed mb-8">
               Masz mieszkanie do wynajęcia, ale nie masz czasu ani nerwów na
