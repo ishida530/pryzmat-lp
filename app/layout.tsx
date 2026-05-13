@@ -19,7 +19,7 @@ export const metadata: Metadata = {
     template: `%s | ${COMPANY.shortName}`,
   },
   description:
-    "Biuro nieruchomości PRYZMAT — sprzedaż, wynajem i zarządzanie w Barczewie, Olsztynie i powiecie olsztyńskim. 11 lat doświadczenia.",
+    "Biuro nieruchomości PRYZMAT — sprzedaż, wynajem i zarządzanie w Barczewie, Olsztynie i powiecie olsztyńskim. 13 lat doświadczenia.",
   robots: { index: true, follow: true },
   icons: {
     icon: [

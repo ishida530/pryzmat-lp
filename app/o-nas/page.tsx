@@ -67,7 +67,7 @@ const teamMembers = [
   {
     name: "Jerzy Sawczuk",
     role: "Założyciel i agent nieruchomości",
-    bio: "Ponad 11 lat na rynku nieruchomości Warmii i Mazur. Specjalista od wycen i negocjacji. Zna każdy zakamarek Barczewa i Olsztyna.",
+    bio: "Ponad 13 lat na rynku nieruchomości Warmii i Mazur. Specjalista od wycen i negocjacji. Zna każdy zakamarek Barczewa i Olsztyna.",
     photoPlaceholder: true,
   },
   // REPLACE with actual team members
