@@ -93,6 +93,13 @@ export default function ONasPage() {
           sizes="100vw"
         />
         <div className="absolute inset-0 bg-brand-dark-navy/88" />
+        <div
+          className="absolute inset-0 pointer-events-none"
+          style={{
+            background:
+              "radial-gradient(ellipse 60% 80% at 80% 50%, rgba(46,110,197,0.18) 0%, transparent 70%)",
+          }}
+        />
         <div className="relative z-10 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <p className="text-brand-red text-xs font-bold tracking-widest uppercase mb-4">
             O NAS
