@@ -17,29 +17,12 @@ const navLinks = [
 /* Inline SVG approximating the PRYZMAT prism logo mark */
 function LogoMark() {
   return (
-    <svg
-      width="40"
-      height="38"
-      viewBox="0 0 100 94"
-      fill="none"
-      xmlns="http://www.w3.org/2000/svg"
-      aria-hidden="true"
-    >
-      {/* Outer triangle — blue stroke */}
-      <path
-        d="M50 4L96 88H4L50 4Z"
-        fill="none"
-        stroke="#2E6EC5"
-        strokeWidth="5"
-        strokeLinejoin="round"
-      />
-      {/* Left inner fill — blue */}
-      <path d="M50 22L14 82H50V22Z" fill="#2E6EC5" />
-      {/* Right inner fill — red */}
-      <path d="M30 82L50 26L70 82H30Z" fill="#C0392B" />
-      {/* Bottom horizontal bar — red */}
-      <rect x="24" y="78" width="52" height="8" rx="1" fill="#C0392B" />
-    </svg>
+    <Image
+      src="/logo.png"
+      alt="PRYZMAT biuro nieruchomości — logo"
+      width={140}
+      height={60}
+    />
   );
 }
 
@@ -55,14 +38,14 @@ export function Navbar() {
           <Link href="/" className="flex items-center gap-3 group shrink-0">
             {/* REPLACE LogoMark with next/image using /public/logo.png when available */}
             <LogoMark />
-            <div className="flex flex-col leading-none">
+            {/* <div className="flex flex-col leading-none">
               <span className="text-white font-extrabold text-xl tracking-wide">
                 PRYZMAT
               </span>
               <span className="text-gray-300 text-[10px] font-medium tracking-widest uppercase">
                 Biuro Nieruchomości
               </span>
-            </div>
+            </div> */}
           </Link>
 
           {/* Desktop navigation */}

@@ -21,6 +21,13 @@ export const metadata: Metadata = {
   description:
     "Biuro nieruchomości PRYZMAT — sprzedaż, wynajem i zarządzanie w Barczewie, Olsztynie i powiecie olsztyńskim. 11 lat doświadczenia.",
   robots: { index: true, follow: true },
+  icons: {
+    icon: [
+      { url: "/favicon.ico", sizes: "any" },
+      { url: "/favicon.png", sizes: "32x32", type: "image/png" },
+    ],
+    apple: "/apple-touch-icon.png",
+  },
   other: {
     "geo.region": "PL-WN",
     "geo.placename": "Barczewo, warmińsko-mazurskie",
