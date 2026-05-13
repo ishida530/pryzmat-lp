@@ -93,6 +93,7 @@ export default function ONasPage() {
           sizes="100vw"
         />
         <div className="absolute inset-0 bg-brand-dark-navy/88" />
+        <div className="absolute inset-0 bg-brand-dark-navy/90" />
         <div
           className="absolute inset-0 pointer-events-none"
           style={{

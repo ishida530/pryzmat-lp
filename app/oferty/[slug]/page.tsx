@@ -4,7 +4,109 @@ import Image from "next/image";
 import Link from "next/link";
 import { MapPin, Home, DoorOpen, Droplet, CheckCircle2, ArrowLeft, Phone, Mail, MessageSquare } from "lucide-react";
 import { COMPANY } from "@/lib/constants";
-import { PLACEHOLDER_OFFERS } from "../page";
+import { type Offer } from "@/components/sections/OffersClient";
+
+// Dane ofert — import z strony głównej ofert byłby lepszy, ale Next.js page export nie pozwala
+const PLACEHOLDER_OFFERS: Offer[] = [
+  {
+    id: 1,
+    slug: "dom-5-pokojowy-barczewo",
+    type: "Dom",
+    title: "Dom 5-pokojowy w spokojnej okolicy",
+    description: "Piękny dom w tradycyjnym stylu, idealny dla rodziny. Nieruchomość znajduje się w cichej okolicy z dostępem do szkół i sklepów.",
+    location: "Barczewo",
+    address: "Ul. Lesna 45, 11-010 Barczewo",
+    price: 450000,
+    area: 120,
+    unit: "m²",
+    rooms: 5,
+    bathrooms: 2,
+    purpose: "sprzedaz",
+    features: ["Ogród", "Garaż", "Piwnica", "Taras", "Kocioł gazowy"],
+    imageUrl: "https://images.unsplash.com/photo-1564013799919-ab600027ffc6?auto=format&fit=crop&w=1920&q=80",
+  },
+  {
+    id: 2,
+    slug: "mieszkanie-3-pokojowe-olsztyn",
+    type: "Mieszkanie",
+    title: "Przestronne mieszkanie 3-pokojowe",
+    description: "Nowoczesne mieszkanie na trzecim piętrze z widokiem na miasto. Pełna aranżacja, gotowe do zamieszkania.",
+    location: "Olsztyn",
+    address: "Ul. Mickiewicza 12/34, 10-001 Olsztyn",
+    price: 320000,
+    area: 65,
+    unit: "m²",
+    rooms: 3,
+    bathrooms: 1,
+    purpose: "sprzedaz",
+    features: ["Balkon", "Miejsce postojowe", "Interkom", "Nowe okna"],
+    imageUrl: "https://images.unsplash.com/photo-1502672260266-1c1ef2d93688?auto=format&fit=crop&w=1920&q=80",
+  },
+  {
+    id: 3,
+    slug: "dzialka-budowlana-barczewo",
+    type: "Działka",
+    title: "Działka budowlana z widokiem",
+    description: "Uzbrojona działka w doskonałej lokalizacji. Dostęp do mediów, idealna do budowy domu jednorodzinnego.",
+    location: "Barczewo",
+    address: "Ul. Polna, 11-010 Barczewo",
+    price: 180000,
+    area: 800,
+    unit: "m²",
+    purpose: "sprzedaz",
+    features: ["Dostęp do drogi", "Media na terenie", "Prąd", "Woda", "Kanalizacja"],
+    imageUrl: "https://images.unsplash.com/photo-1511884642898-4c92249e20b6?auto=format&fit=crop&w=1920&q=80",
+  },
+  {
+    id: 4,
+    slug: "dom-z-ogrodem-olsztyn",
+    type: "Dom",
+    title: "Dom z ogrodem i garażem",
+    description: "Komfortowy dom w zielonej części miasta. Doskonała inwestycja dla rodziny poszukującej spokoju.",
+    location: "Olsztyn",
+    address: "Ul. Sosnowa 78, 10-250 Olsztyn",
+    price: 580000,
+    area: 150,
+    unit: "m²",
+    rooms: 6,
+    bathrooms: 2,
+    purpose: "sprzedaz",
+    features: ["Ogród 500m²", "Garaż 2-stanowiskowy", "Gaz", "Kocioł kondensacyjny"],
+    imageUrl: "https://images.unsplash.com/photo-1570129477492-45c003edd2be?auto=format&fit=crop&w=1920&q=80",
+  },
+  {
+    id: 5,
+    slug: "mieszkanie-wynajem-olsztyn",
+    type: "Mieszkanie",
+    title: "Mieszkanie blisko centrum",
+    description: "Komfortowe mieszkanie do wynajęcia w centrum Olsztyna. Nowe, umeblowane, ze wszystkimi sprzętami.",
+    location: "Olsztyn",
+    address: "Ul. Wiejska 23/5, 10-001 Olsztyn",
+    price: 2800,
+    area: 58,
+    unit: "m²",
+    rooms: 2,
+    bathrooms: 1,
+    purpose: "wynajem",
+    features: ["Umeblowane", "Kuchnia", "WiFi", "Pralka", "Klimatyzacja"],
+    imageUrl: "https://images.unsplash.com/photo-1502672260266-1c1ef2d93688?auto=format&fit=crop&w=1920&q=80",
+  },
+  {
+    id: 6,
+    slug: "dzialka-zabudowe-barczewo",
+    type: "Działka",
+    title: "Atrakcyjna działka pod zabudowę",
+    description: "Rozległa działka w pięknej okolicy. Bliski kontakt z naturą, brak sąsiedztwa, wygodny dojazd do miasta.",
+    location: "Barczewo",
+    address: "Powiat olsztyński - gmina Barczewo",
+    price: 95000,
+    area: 1200,
+    unit: "m²",
+    purpose: "sprzedaz",
+    features: ["Las w pobliżu", "Cisza i spokój", "Droga dojazdowa", "Doskonała lokalizacja"],
+    imageUrl: "https://images.unsplash.com/photo-1511884642898-4c92249e20b6?auto=format&fit=crop&w=1920&q=80",
+  },
+];
 
 interface OfferDetailPageProps {
   params: {
@@ -97,13 +199,24 @@ export default function OfferDetailPage({ params }: OfferDetailPageProps) {
           {/* Left column - Main image and details */}
           <div className="lg:col-span-2">
             {/* Main image */}
-            <div className="rounded-2xl overflow-hidden border border-gray-200 shadow-lg mb-8 bg-gray-200 h-[500px]">
+            <div className="rounded-2xl overflow-hidden border border-gray-200 shadow-lg mb-8 bg-gray-200 h-[500px] relative">
               {offer.imageUrl ? (
-                <img
-                  src={offer.imageUrl}
-                  alt={offer.title}
-                  className="w-full h-full object-cover"
-                />
+                <>
+                  <img
+                    src={offer.imageUrl}
+                    alt={offer.title}
+                    className="w-full h-full object-cover"
+                  />
+                  {/* Overlay layer for consistency with homepage */}
+                  <div className="absolute inset-0 bg-gradient-to-br from-brand-navy/20 via-transparent to-brand-navy/10" />
+                  <div
+                    className="absolute inset-0 pointer-events-none"
+                    style={{
+                      background:
+                        "radial-gradient(ellipse 50% 70% at 15% 55%, rgba(46,110,197,0.15) 0%, transparent 65%)",
+                    }}
+                  />
+                </>
               ) : (
                 <div className="w-full h-full bg-gradient-to-br from-brand-navy/10 to-brand-blue/10 flex items-center justify-center">
                   <Home className="w-20 h-20 text-brand-navy/20" />
@@ -313,15 +426,19 @@ export default function OfferDetailPage({ params }: OfferDetailPageProps) {
                 >
                   <div className="h-40 bg-gradient-to-br from-brand-navy/10 to-brand-blue/10 flex items-center justify-center relative overflow-hidden">
                     {similarOffer.imageUrl ? (
-                      <img
-                        src={similarOffer.imageUrl}
-                        alt={similarOffer.title}
-                        className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-300"
-                      />
+                      <>
+                        <img
+                          src={similarOffer.imageUrl}
+                          alt={similarOffer.title}
+                          className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-300"
+                        />
+                        {/* Overlay layer for consistency */}
+                        <div className="absolute inset-0 bg-gradient-to-br from-brand-navy/15 via-transparent to-brand-navy/10 pointer-events-none" />
+                      </>
                     ) : (
                       <Home className="w-10 h-10 text-brand-navy/30" />
                     )}
-                    <span className="absolute top-3 left-3 bg-brand-navy text-white text-[11px] font-bold px-2.5 py-1 rounded-full">
+                    <span className="absolute top-3 left-3 bg-brand-navy text-white text-[11px] font-bold px-2.5 py-1 rounded-full z-10">
                       {similarOffer.type}
                     </span>
                   </div>

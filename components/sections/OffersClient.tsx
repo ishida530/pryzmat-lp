@@ -152,11 +152,15 @@ export function OffersClient({ offers }: { offers: Offer[] }) {
               {/* Image placeholder */}
               <div className="h-44 bg-gradient-to-br from-brand-navy/10 to-brand-blue/10 flex items-center justify-center relative overflow-hidden">
                 {offer.imageUrl ? (
-                  <img 
-                    src={offer.imageUrl} 
-                    alt={offer.title}
-                    className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-300"
-                  />
+                  <>
+                    <img 
+                      src={offer.imageUrl} 
+                      alt={offer.title}
+                      className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-300"
+                    />
+                    {/* Overlay layer for consistency with homepage */}
+                    <div className="absolute inset-0 bg-gradient-to-br from-brand-navy/15 via-transparent to-brand-navy/10 pointer-events-none" />
+                  </>
                 ) : (
                   <Home className="w-10 h-10 text-brand-navy/30" />
                 )}

@@ -12,7 +12,7 @@ export const metadata: Metadata = createMetadata(
 );
 
 // FAZA 2: Replace with real offers fetched from ASARI API
-export const PLACEHOLDER_OFFERS: Offer[] = [
+const PLACEHOLDER_OFFERS: Offer[] = [
   {
     id: 1,
     slug: "dom-5-pokojowy-barczewo",
@@ -128,7 +128,7 @@ export default function OfertyPage() {
           priority
           sizes="100vw"
         />
-        <div className="absolute inset-0 bg-brand-dark-navy/88" />
+        <div className="absolute inset-0 bg-brand-dark-navy/90" />
         <div
           className="absolute inset-0 pointer-events-none"
           style={{

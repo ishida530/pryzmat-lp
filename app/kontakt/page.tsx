@@ -48,11 +48,12 @@ export default function KontaktPage() {
           src="https://images.unsplash.com/photo-1556761175-5973dc0f32e7?auto=format&fit=crop&w=1920&q=80"
           alt="Biuro Nieruchomości PRYZMAT — kontakt"
           fill
-          className="object-cover object-center"
+          className="object-cover"
+          style={{ objectPosition: "center 20%" }}
           priority
           sizes="100vw"
         />
-        <div className="absolute inset-0 bg-brand-dark-navy/88" />
+        <div className="absolute inset-0 bg-brand-dark-navy/90" />
         <div
           className="absolute inset-0 pointer-events-none"
           style={{
