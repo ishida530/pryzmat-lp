@@ -1,112 +1,13 @@
 import type { Metadata } from "next";
+import { notFound } from "next/navigation";
 import { createMetadata } from "@/lib/seo";
 import Image from "next/image";
 import Link from "next/link";
 import { MapPin, Home, DoorOpen, Droplet, CheckCircle2, ArrowLeft, Phone, Mail, MessageSquare } from "lucide-react";
 import { COMPANY } from "@/lib/constants";
-import { type Offer } from "@/components/sections/OffersClient";
+import { getListingIds, getListing, mapToOffer } from "@/lib/asari";
 
-// Dane ofert — import z strony głównej ofert byłby lepszy, ale Next.js page export nie pozwala
-const PLACEHOLDER_OFFERS: Offer[] = [
-  {
-    id: 1,
-    slug: "dom-5-pokojowy-barczewo",
-    type: "Dom",
-    title: "Dom 5-pokojowy w spokojnej okolicy",
-    description: "Piękny dom w tradycyjnym stylu, idealny dla rodziny. Nieruchomość znajduje się w cichej okolicy z dostępem do szkół i sklepów.",
-    location: "Barczewo",
-    address: "Ul. Lesna 45, 11-010 Barczewo",
-    price: 450000,
-    area: 120,
-    unit: "m²",
-    rooms: 5,
-    bathrooms: 2,
-    purpose: "sprzedaz",
-    features: ["Ogród", "Garaż", "Piwnica", "Taras", "Kocioł gazowy"],
-    imageUrl: "https://images.unsplash.com/photo-1564013799919-ab600027ffc6?auto=format&fit=crop&w=1920&q=80",
-  },
-  {
-    id: 2,
-    slug: "mieszkanie-3-pokojowe-olsztyn",
-    type: "Mieszkanie",
-    title: "Przestronne mieszkanie 3-pokojowe",
-    description: "Nowoczesne mieszkanie na trzecim piętrze z widokiem na miasto. Pełna aranżacja, gotowe do zamieszkania.",
-    location: "Olsztyn",
-    address: "Ul. Mickiewicza 12/34, 10-001 Olsztyn",
-    price: 320000,
-    area: 65,
-    unit: "m²",
-    rooms: 3,
-    bathrooms: 1,
-    purpose: "sprzedaz",
-    features: ["Balkon", "Miejsce postojowe", "Interkom", "Nowe okna"],
-    imageUrl: "https://images.unsplash.com/photo-1502672260266-1c1ef2d93688?auto=format&fit=crop&w=1920&q=80",
-  },
-  {
-    id: 3,
-    slug: "dzialka-budowlana-barczewo",
-    type: "Działka",
-    title: "Działka budowlana z widokiem",
-    description: "Uzbrojona działka w doskonałej lokalizacji. Dostęp do mediów, idealna do budowy domu jednorodzinnego.",
-    location: "Barczewo",
-    address: "Ul. Polna, 11-010 Barczewo",
-    price: 180000,
-    area: 800,
-    unit: "m²",
-    purpose: "sprzedaz",
-    features: ["Dostęp do drogi", "Media na terenie", "Prąd", "Woda", "Kanalizacja"],
-    imageUrl: "https://images.unsplash.com/photo-1511884642898-4c92249e20b6?auto=format&fit=crop&w=1920&q=80",
-  },
-  {
-    id: 4,
-    slug: "dom-z-ogrodem-olsztyn",
-    type: "Dom",
-    title: "Dom z ogrodem i garażem",
-    description: "Komfortowy dom w zielonej części miasta. Doskonała inwestycja dla rodziny poszukującej spokoju.",
-    location: "Olsztyn",
-    address: "Ul. Sosnowa 78, 10-250 Olsztyn",
-    price: 580000,
-    area: 150,
-    unit: "m²",
-    rooms: 6,
-    bathrooms: 2,
-    purpose: "sprzedaz",
-    features: ["Ogród 500m²", "Garaż 2-stanowiskowy", "Gaz", "Kocioł kondensacyjny"],
-    imageUrl: "https://images.unsplash.com/photo-1570129477492-45c003edd2be?auto=format&fit=crop&w=1920&q=80",
-  },
-  {
-    id: 5,
-    slug: "mieszkanie-wynajem-olsztyn",
-    type: "Mieszkanie",
-    title: "Mieszkanie blisko centrum",
-    description: "Komfortowe mieszkanie do wynajęcia w centrum Olsztyna. Nowe, umeblowane, ze wszystkimi sprzętami.",
-    location: "Olsztyn",
-    address: "Ul. Wiejska 23/5, 10-001 Olsztyn",
-    price: 2800,
-    area: 58,
-    unit: "m²",
-    rooms: 2,
-    bathrooms: 1,
-    purpose: "wynajem",
-    features: ["Umeblowane", "Kuchnia", "WiFi", "Pralka", "Klimatyzacja"],
-    imageUrl: "https://images.unsplash.com/photo-1502672260266-1c1ef2d93688?auto=format&fit=crop&w=1920&q=80",
-  },
-  {
-    id: 6,
-    slug: "dzialka-zabudowe-barczewo",
-    type: "Działka",
-    title: "Atrakcyjna działka pod zabudowę",
-    description: "Rozległa działka w pięknej okolicy. Bliski kontakt z naturą, brak sąsiedztwa, wygodny dojazd do miasta.",
-    location: "Barczewo",
-    address: "Powiat olsztyński - gmina Barczewo",
-    price: 95000,
-    area: 1200,
-    unit: "m²",
-    purpose: "sprzedaz",
-    features: ["Las w pobliżu", "Cisza i spokój", "Droga dojazdowa", "Doskonała lokalizacja"],
-    imageUrl: "https://images.unsplash.com/photo-1511884642898-4c92249e20b6?auto=format&fit=crop&w=1920&q=80",
-  },
-];
+export const revalidate = 600;
 
 interface OfferDetailPageProps {
   params: {
@@ -114,32 +15,27 @@ interface OfferDetailPageProps {
   };
 }
 
-export async function generateMetadata({
-  params,
-}: OfferDetailPageProps): Promise<Metadata> {
-  const offer = PLACEHOLDER_OFFERS.find((o) => o.slug === params.slug);
 
-  if (!offer) {
+export async function generateMetadata({ params }: OfferDetailPageProps): Promise<Metadata> {
+  try {
+    const listing = await getListing(Number(params.slug));
+    const offer = mapToOffer(listing);
+    const priceLabel =
+      offer.purpose === "sprzedaz"
+        ? `Cena: ${offer.price.toLocaleString("pl-PL")} zł.`
+        : `Czynsz: ${offer.price.toLocaleString("pl-PL")} zł/mies.`;
+    return createMetadata(
+      offer.title,
+      `${offer.title} — ${offer.area} m² w ${offer.location}. ${priceLabel}`,
+      `/oferty/${params.slug}`
+    );
+  } catch {
     return createMetadata(
       "Oferta nie znaleziona",
       "Szukana oferta nieruchomości nie istnieje.",
       `/oferty/${params.slug}`
     );
   }
-
-  const description = `${offer.title} - ${offer.area}m² w ${offer.location}. ${offer.purpose === "sprzedaz" ? `Cena: ${offer.price.toLocaleString("pl-PL")} zł.` : `Czynsz: ${offer.price.toLocaleString("pl-PL")} zł/mies.`}`;
-
-  return createMetadata(
-    offer.title,
-    description,
-    `/oferty/${offer.slug}`
-  );
-}
-
-export async function generateStaticParams() {
-  return PLACEHOLDER_OFFERS.map((offer) => ({
-    slug: offer.slug,
-  }));
 }
 
 function formatPrice(price: number) {
@@ -150,33 +46,24 @@ function formatPrice(price: number) {
   }).format(price);
 }
 
-export default function OfferDetailPage({ params }: OfferDetailPageProps) {
-  const offer = PLACEHOLDER_OFFERS.find((o) => o.slug === params.slug);
-
-  if (!offer) {
-    return (
-      <div className="min-h-screen bg-gray-50 flex items-center justify-center">
-        <div className="text-center">
-          <Home className="w-16 h-16 text-gray-300 mx-auto mb-4" />
-          <h1 className="text-2xl font-bold text-gray-900 mb-2">
-            Oferta nie znaleziona
-          </h1>
-          <p className="text-gray-500 mb-6">
-            Szukana oferta nieruchomości nie istnieje lub została usunięta.
-          </p>
-          <Link
-            href="/oferty"
-            className="inline-flex items-center gap-2 bg-brand-navy text-white px-6 py-3 rounded-lg font-semibold hover:bg-blue-900 transition-colors"
-          >
-            <ArrowLeft className="w-4 h-4" />
-            Wróć do ofert
-          </Link>
-        </div>
-      </div>
-    );
+export default async function OfferDetailPage({ params }: OfferDetailPageProps) {
+  let listing;
+  try {
+    listing = await getListing(Number(params.slug));
+  } catch {
+    notFound();
   }
 
-  const otherOffers = PLACEHOLDER_OFFERS.filter((o) => o.id !== offer.id).slice(0, 3);
+  const offer = mapToOffer(listing);
+
+  // Fetch IDs of other offers (same section), then fetch their details.
+  // Uses getListingIds() which is globalThis-cached — no extra API quota used.
+  const allRefs = await getListingIds();
+  const similarRefs = allRefs.filter((r) => r.id !== listing.id).slice(0, 3);
+  const similarSettled = await Promise.allSettled(similarRefs.map((r) => getListing(r.id)));
+  const similarOffers = similarSettled
+    .filter((r): r is PromiseFulfilledResult<Awaited<ReturnType<typeof getListing>>> => r.status === "fulfilled")
+    .map((r) => mapToOffer(r.value));
 
   return (
     <div className="min-h-screen bg-gray-50">
@@ -202,12 +89,14 @@ export default function OfferDetailPage({ params }: OfferDetailPageProps) {
             <div className="rounded-2xl overflow-hidden border border-gray-200 shadow-lg mb-8 bg-gray-200 h-[500px] relative">
               {offer.imageUrl ? (
                 <>
-                  <img
+                  <Image
                     src={offer.imageUrl}
                     alt={offer.title}
-                    className="w-full h-full object-cover"
+                    fill
+                    className="object-cover"
+                    priority
+                    sizes="(max-width: 1024px) 100vw, 66vw"
                   />
-                  {/* Overlay layer for consistency with homepage */}
                   <div className="absolute inset-0 bg-gradient-to-br from-brand-navy/20 via-transparent to-brand-navy/10" />
                   <div
                     className="absolute inset-0 pointer-events-none"
@@ -320,12 +209,8 @@ export default function OfferDetailPage({ params }: OfferDetailPageProps) {
 
               {/* Description */}
               <div>
-                <h2 className="text-xl font-bold text-brand-navy mb-3">
-                  Opis
-                </h2>
-                <p className="text-gray-600 leading-relaxed">
-                  {offer.description}
-                </p>
+                <h2 className="text-xl font-bold text-brand-navy mb-3">Opis</h2>
+                <p className="text-gray-600 leading-relaxed">{offer.description}</p>
               </div>
             </div>
 
@@ -352,7 +237,6 @@ export default function OfferDetailPage({ params }: OfferDetailPageProps) {
 
           {/* Right column - Contact CTA */}
           <div className="lg:col-span-1">
-            {/* Contact card */}
             <div className="bg-white rounded-2xl border border-gray-100 shadow-sm p-8 sticky top-8 mb-8">
               <h2 className="text-xl font-bold text-brand-navy mb-2">
                 Zainteresowany?
@@ -362,7 +246,6 @@ export default function OfferDetailPage({ params }: OfferDetailPageProps) {
                 nieruchomości.
               </p>
 
-              {/* Contact buttons */}
               <div className="space-y-3 mb-8">
                 <a
                   href={`tel:${COMPANY.phone}`}
@@ -387,7 +270,6 @@ export default function OfferDetailPage({ params }: OfferDetailPageProps) {
                 </Link>
               </div>
 
-              {/* Info card */}
               <div className="bg-gray-50 rounded-lg p-4 border border-gray-100">
                 <p className="text-xs text-gray-500 mb-2">
                   📍 {COMPANY.name.toUpperCase()}
@@ -412,13 +294,13 @@ export default function OfferDetailPage({ params }: OfferDetailPageProps) {
         </div>
 
         {/* Similar offers section */}
-        {otherOffers.length > 0 && (
+        {similarOffers.length > 0 && (
           <div className="mt-16">
             <h2 className="text-2xl font-bold text-brand-navy mb-8">
               Podobne oferty
             </h2>
             <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
-              {otherOffers.map((similarOffer) => (
+              {similarOffers.map((similarOffer) => (
                 <Link
                   key={similarOffer.id}
                   href={`/oferty/${similarOffer.slug}`}
@@ -427,12 +309,13 @@ export default function OfferDetailPage({ params }: OfferDetailPageProps) {
                   <div className="h-40 bg-gradient-to-br from-brand-navy/10 to-brand-blue/10 flex items-center justify-center relative overflow-hidden">
                     {similarOffer.imageUrl ? (
                       <>
-                        <img
+                        <Image
                           src={similarOffer.imageUrl}
                           alt={similarOffer.title}
-                          className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-300"
+                          fill
+                          className="object-cover group-hover:scale-110 transition-transform duration-300"
+                          sizes="(max-width: 640px) 100vw, (max-width: 1024px) 50vw, 33vw"
                         />
-                        {/* Overlay layer for consistency */}
                         <div className="absolute inset-0 bg-gradient-to-br from-brand-navy/15 via-transparent to-brand-navy/10 pointer-events-none" />
                       </>
                     ) : (
