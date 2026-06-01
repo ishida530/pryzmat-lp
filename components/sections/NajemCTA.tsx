@@ -11,7 +11,7 @@ const benefits = [
 
 export function NajemCTA() {
   return (
-    <section className="relative overflow-hidden py-20 lg:py-28">
+    <section className="relative overflow-hidden py-20 lg:py-28" aria-labelledby="najem-heading">
       {/* Background property photo — REPLACE with actual photo */}
       <Image
         src="https://images.unsplash.com/photo-1560448204-603b3fc33ddc?auto=format&fit=crop&w=1920&q=80"
@@ -31,7 +31,7 @@ export function NajemCTA() {
             <p className="text-brand-red text-xs font-bold tracking-widest uppercase mb-4">
               DLA WŁAŚCICIELI MIESZKAŃ
             </p>
-            <h2 className="text-3xl lg:text-4xl font-extrabold text-white leading-tight mb-5">
+            <h2 id="najem-heading" className="text-3xl lg:text-4xl font-extrabold text-white leading-tight mb-5">
               Masz mieszkanie do wynajęcia?{" "}
               <span className="text-blue-300">Zajmiemy się wszystkim.</span>
             </h2>
@@ -45,7 +45,7 @@ export function NajemCTA() {
             <ul className="space-y-2.5 mb-8">
               {benefits.map((b) => (
                 <li key={b} className="flex items-center gap-3 text-gray-300 text-sm">
-                  <CheckCircle2 className="w-4 h-4 text-brand-red shrink-0" />
+                  <CheckCircle2 className="w-4 h-4 text-brand-red shrink-0" aria-hidden="true" />
                   {b}
                 </li>
               ))}
@@ -66,7 +66,7 @@ export function NajemCTA() {
                 className="inline-flex items-center gap-2 bg-brand-navy text-white font-bold px-6 py-3 rounded-lg hover:bg-blue-900 transition-colors"
               >
                 Dowiedz się więcej
-                <ArrowRight className="w-4 h-4" />
+                <ArrowRight className="w-4 h-4" aria-hidden="true" />
               </Link>
             </div>
           </div>

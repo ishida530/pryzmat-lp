@@ -52,7 +52,7 @@ export function Contact() {
   const { ref, inView } = useInView(0.1);
 
   return (
-    <section ref={ref} id="kontakt" className="py-20 lg:py-28 bg-brand-light-blue">
+    <section ref={ref} id="kontakt" aria-labelledby="kontakt-heading" className="py-20 lg:py-28 bg-brand-light-blue">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
 
         <div
@@ -60,7 +60,7 @@ export function Contact() {
           style={inView ? { animationDelay: "0ms" } : undefined}
         >
           <p className="section-label mb-3">KONTAKT</p>
-          <h2 className="text-3xl lg:text-4xl font-extrabold text-brand-navy">
+          <h2 id="kontakt-heading" className="text-3xl lg:text-4xl font-extrabold text-brand-navy">
             Skontaktuj się z nami
           </h2>
           <p className="text-gray-500 mt-3 max-w-lg mx-auto text-base">
@@ -76,8 +76,8 @@ export function Contact() {
             style={inView ? { animationDelay: "100ms" } : undefined}
           >
             {submitted ? (
-              <div className="flex flex-col items-center justify-center py-12 text-center">
-                <CheckCircle2 className="w-14 h-14 text-green-500 mb-4" />
+              <div className="flex flex-col items-center justify-center py-12 text-center" role="status" aria-live="polite">
+                <CheckCircle2 className="w-14 h-14 text-green-500 mb-4" aria-hidden="true" />
                 <h3 className="text-xl font-bold text-brand-navy mb-2">
                   Wiadomość wysłana!
                 </h3>
@@ -92,51 +92,67 @@ export function Contact() {
                 </button>
               </div>
             ) : (
-              <form onSubmit={handleSubmit(onSubmit)} noValidate className="space-y-4">
+              <form onSubmit={handleSubmit(onSubmit)} noValidate aria-label="Formularz kontaktowy" className="space-y-4">
                 <div className="grid sm:grid-cols-2 gap-4">
                   <div>
+                    <label htmlFor="contact-imie" className="sr-only">Imię</label>
                     <input
                       {...register("imie")}
+                      id="contact-imie"
                       type="text"
                       placeholder="Imię *"
                       autoComplete="given-name"
+                      aria-invalid={!!errors.imie}
+                      aria-describedby={errors.imie ? "contact-imie-error" : undefined}
                       className={inputClass}
                     />
                     {errors.imie && (
-                      <p className="text-red-500 text-xs mt-1">{errors.imie.message}</p>
+                      <p id="contact-imie-error" role="alert" className="text-red-500 text-xs mt-1">{errors.imie.message}</p>
                     )}
                   </div>
                   <div>
+                    <label htmlFor="contact-telefon" className="sr-only">Telefon</label>
                     <input
                       {...register("telefon")}
+                      id="contact-telefon"
                       type="tel"
                       placeholder="Telefon *"
                       autoComplete="tel"
+                      aria-invalid={!!errors.telefon}
+                      aria-describedby={errors.telefon ? "contact-telefon-error" : undefined}
                       className={inputClass}
                     />
                     {errors.telefon && (
-                      <p className="text-red-500 text-xs mt-1">{errors.telefon.message}</p>
+                      <p id="contact-telefon-error" role="alert" className="text-red-500 text-xs mt-1">{errors.telefon.message}</p>
                     )}
                   </div>
                 </div>
 
                 <div>
+                  <label htmlFor="contact-email" className="sr-only">E-mail</label>
                   <input
                     {...register("email")}
+                    id="contact-email"
                     type="email"
                     placeholder="E-mail (opcjonalnie)"
                     autoComplete="email"
+                    aria-invalid={!!errors.email}
+                    aria-describedby={errors.email ? "contact-email-error" : undefined}
                     className={inputClass}
                   />
                   {errors.email && (
-                    <p className="text-red-500 text-xs mt-1">{errors.email.message}</p>
+                    <p id="contact-email-error" role="alert" className="text-red-500 text-xs mt-1">{errors.email.message}</p>
                   )}
                 </div>
 
                 <div>
+                  <label htmlFor="contact-szukasz" className="sr-only">Czego szukasz?</label>
                   <select
                     {...register("szukasz")}
+                    id="contact-szukasz"
                     defaultValue=""
+                    aria-invalid={!!errors.szukasz}
+                    aria-describedby={errors.szukasz ? "contact-szukasz-error" : undefined}
                     className={`${inputClass} text-gray-700`}
                   >
                     <option value="" disabled>
@@ -151,13 +167,15 @@ export function Contact() {
                     <option value="inne">Inne zapytanie</option>
                   </select>
                   {errors.szukasz && (
-                    <p className="text-red-500 text-xs mt-1">{errors.szukasz.message}</p>
+                    <p id="contact-szukasz-error" role="alert" className="text-red-500 text-xs mt-1">{errors.szukasz.message}</p>
                   )}
                 </div>
 
                 <div>
+                  <label htmlFor="contact-wiadomosc" className="sr-only">Wiadomość</label>
                   <textarea
                     {...register("wiadomosc")}
+                    id="contact-wiadomosc"
                     rows={4}
                     placeholder="Wiadomość (opcjonalnie)"
                     className={`${inputClass} resize-none`}
@@ -165,15 +183,16 @@ export function Contact() {
                 </div>
 
                 {serverError && (
-                  <p className="text-red-500 text-sm">{serverError}</p>
+                  <p role="alert" className="text-red-500 text-sm">{serverError}</p>
                 )}
 
                 <button
                   type="submit"
                   disabled={loading}
+                  aria-busy={loading}
                   className="w-full bg-brand-red text-white py-4 rounded-lg font-bold text-base hover:bg-red-700 transition-colors disabled:opacity-50"
                 >
-                  {loading ? "Wysyłanie…" : "Wyślij wiadomość →"}
+                  {loading ? "Wysyłanie…" : <><span>Wyślij wiadomość</span><span aria-hidden="true"> →</span></>}
                 </button>
 
                 <p className="text-gray-400 text-xs text-center">
@@ -203,7 +222,7 @@ export function Contact() {
                 className="flex items-center gap-3 group"
               >
                 <div className="w-10 h-10 bg-brand-red/10 rounded-xl flex items-center justify-center shrink-0">
-                  <Phone className="w-5 h-5 text-brand-red" />
+                  <Phone className="w-5 h-5 text-brand-red" aria-hidden="true" />
                 </div>
                 <div>
                   <p className="text-xs text-gray-400 uppercase tracking-wide">
@@ -220,7 +239,7 @@ export function Contact() {
                 className="flex items-center gap-3 group"
               >
                 <div className="w-10 h-10 bg-brand-blue/10 rounded-xl flex items-center justify-center shrink-0">
-                  <Mail className="w-5 h-5 text-brand-blue" />
+                  <Mail className="w-5 h-5 text-brand-blue" aria-hidden="true" />
                 </div>
                 <div>
                   <p className="text-xs text-gray-400 uppercase tracking-wide">
@@ -234,7 +253,7 @@ export function Contact() {
 
               <div className="flex items-start gap-3">
                 <div className="w-10 h-10 bg-gray-100 rounded-xl flex items-center justify-center shrink-0">
-                  <MapPin className="w-5 h-5 text-gray-600" />
+                  <MapPin className="w-5 h-5 text-gray-600" aria-hidden="true" />
                 </div>
                 <div>
                   <p className="text-xs text-gray-400 uppercase tracking-wide">
@@ -251,7 +270,7 @@ export function Contact() {
 
               <div className="flex items-start gap-3">
                 <div className="w-10 h-10 bg-gray-100 rounded-xl flex items-center justify-center shrink-0">
-                  <Clock className="w-5 h-5 text-gray-600" />
+                  <Clock className="w-5 h-5 text-gray-600" aria-hidden="true" />
                 </div>
                 <div>
                   <p className="text-xs text-gray-400 uppercase tracking-wide mb-1">
@@ -273,7 +292,7 @@ export function Contact() {
                 rel="noopener noreferrer"
                 className="flex flex-col items-center gap-2 text-gray-400 hover:text-brand-blue transition-colors"
               >
-                <MapPin className="w-8 h-8" />
+                <MapPin className="w-8 h-8" aria-hidden="true" />
                 <span className="text-sm font-medium">Otwórz w Mapach Google</span>
                 <span className="text-xs">{COMPANY.address.full}</span>
               </a>

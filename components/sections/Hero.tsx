@@ -45,7 +45,7 @@ export function Hero() {
   }
 
   return (
-    <section className="relative overflow-hidden">
+    <section className="relative overflow-hidden" aria-labelledby="hero-heading">
       {/* Full-width background property photo — REPLACE with actual local property photo */}
       <Image
         src="https://images.unsplash.com/photo-1564013799919-ab600027ffc6?auto=format&fit=crop&w=1920&q=80"
@@ -84,6 +84,7 @@ export function Hero() {
 
             {/* H1 — contains SEO keyword */}
             <h1
+              id="hero-heading"
               className="text-4xl md:text-5xl lg:text-[52px] font-extrabold text-white leading-[1.15] tracking-tight text-balance animate-fade-up"
               style={{ animationDelay: "120ms" }}
             >
@@ -158,8 +159,8 @@ export function Hero() {
             {/* FAZA 3: Replace this card with AI chatbot widget */}
             <div className="bg-white rounded-2xl shadow-2xl p-7 lg:p-8">
                 {submitted ? (
-                  <div className="text-center py-8">
-                    <CheckCircle2 className="w-14 h-14 text-green-500 mx-auto mb-4" />
+                  <div className="text-center py-8" role="status" aria-live="polite">
+                    <CheckCircle2 className="w-14 h-14 text-green-500 mx-auto mb-4" aria-hidden="true" />
                     <h2 className="text-xl font-extrabold text-brand-navy mb-2">
                       Dziękujemy!
                     </h2>
@@ -181,34 +182,43 @@ export function Hero() {
                     <form
                       onSubmit={handleSubmit(onSubmit)}
                       noValidate
+                      aria-label="Formularz kontaktowy"
                       className="space-y-3.5"
                     >
                       {/* Imię + Telefon — side by side */}
                       <div className="grid grid-cols-2 gap-3">
                         <div>
+                          <label htmlFor="imie" className="sr-only">Imię</label>
                           <input
                             {...register("imie")}
+                            id="imie"
                             type="text"
                             placeholder="Imię"
                             autoComplete="given-name"
+                            aria-invalid={!!errors.imie}
+                            aria-describedby={errors.imie ? "imie-error" : undefined}
                             className="w-full border border-gray-200 rounded-lg px-3.5 py-3 text-sm focus:outline-none focus:ring-2 focus:ring-brand-blue focus:border-transparent placeholder-gray-400"
                           />
                           {errors.imie && (
-                            <p className="text-red-500 text-[11px] mt-1">
+                            <p id="imie-error" role="alert" className="text-red-500 text-[11px] mt-1">
                               {errors.imie.message}
                             </p>
                           )}
                         </div>
                         <div>
+                          <label htmlFor="telefon" className="sr-only">Telefon</label>
                           <input
                             {...register("telefon")}
+                            id="telefon"
                             type="tel"
                             placeholder="Telefon"
                             autoComplete="tel"
+                            aria-invalid={!!errors.telefon}
+                            aria-describedby={errors.telefon ? "telefon-error" : undefined}
                             className="w-full border border-gray-200 rounded-lg px-3.5 py-3 text-sm focus:outline-none focus:ring-2 focus:ring-brand-blue focus:border-transparent placeholder-gray-400"
                           />
                           {errors.telefon && (
-                            <p className="text-red-500 text-[11px] mt-1">
+                            <p id="telefon-error" role="alert" className="text-red-500 text-[11px] mt-1">
                               {errors.telefon.message}
                             </p>
                           )}
@@ -216,9 +226,13 @@ export function Hero() {
                       </div>
 
                       <div>
+                        <label htmlFor="rodzajNieruchomosci" className="sr-only">Rodzaj nieruchomości</label>
                         <select
                           {...register("rodzajNieruchomosci")}
+                          id="rodzajNieruchomosci"
                           defaultValue=""
+                          aria-invalid={!!errors.rodzajNieruchomosci}
+                          aria-describedby={errors.rodzajNieruchomosci ? "rodzaj-error" : undefined}
                           className="w-full border border-gray-200 rounded-lg px-3.5 py-3 text-sm focus:outline-none focus:ring-2 focus:ring-brand-blue focus:border-transparent text-gray-700"
                         >
                           <option value="" disabled>
@@ -230,16 +244,20 @@ export function Hero() {
                           <option value="inne">Inne</option>
                         </select>
                         {errors.rodzajNieruchomosci && (
-                          <p className="text-red-500 text-[11px] mt-1">
+                          <p id="rodzaj-error" role="alert" className="text-red-500 text-[11px] mt-1">
                             {errors.rodzajNieruchomosci.message}
                           </p>
                         )}
                       </div>
 
                       <div>
+                        <label htmlFor="cel" className="sr-only">Cel</label>
                         <select
                           {...register("cel")}
+                          id="cel"
                           defaultValue=""
+                          aria-invalid={!!errors.cel}
+                          aria-describedby={errors.cel ? "cel-error" : undefined}
                           className="w-full border border-gray-200 rounded-lg px-3.5 py-3 text-sm focus:outline-none focus:ring-2 focus:ring-brand-blue focus:border-transparent text-gray-700"
                         >
                           <option value="" disabled>
@@ -252,24 +270,25 @@ export function Hero() {
                           </option>
                         </select>
                         {errors.cel && (
-                          <p className="text-red-500 text-[11px] mt-1">
+                          <p id="cel-error" role="alert" className="text-red-500 text-[11px] mt-1">
                             {errors.cel.message}
                           </p>
                         )}
                       </div>
 
                       {serverError && (
-                        <p className="text-red-500 text-sm">{serverError}</p>
+                        <p role="alert" className="text-red-500 text-sm">{serverError}</p>
                       )}
 
                       <button
                         type="submit"
                         disabled={loading}
+                        aria-busy={loading}
                         className="w-full bg-brand-red text-white py-4 rounded-lg font-bold text-base hover:bg-red-700 transition-colors disabled:opacity-50 mt-1"
                       >
                         {loading
                           ? "Wysyłanie…"
-                          : "Umów konsultację →"}
+                          : <><span>Umów konsultację</span><span aria-hidden="true"> →</span></>}
                       </button>
                     </form>
 

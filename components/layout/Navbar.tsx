@@ -38,14 +38,6 @@ export function Navbar() {
           <Link href="/" className="flex items-center gap-3 group shrink-0">
             {/* REPLACE LogoMark with next/image using /public/logo.png when available */}
             <LogoMark />
-            {/* <div className="flex flex-col leading-none">
-              <span className="text-white font-extrabold text-xl tracking-wide">
-                PRYZMAT
-              </span>
-              <span className="text-gray-300 text-[10px] font-medium tracking-widest uppercase">
-                Biuro Nieruchomości
-              </span>
-            </div> */}
           </Link>
 
           {/* Desktop navigation */}
@@ -67,7 +59,7 @@ export function Navbar() {
               href={`tel:${COMPANY.phone}`}
               className="hidden md:flex items-center gap-2 text-gray-300 hover:text-white text-sm transition-colors"
             >
-              <Phone className="w-4 h-4" />
+              <Phone className="w-4 h-4" aria-hidden="true" />
               <span className="font-medium">{COMPANY.phoneDisplay}</span>
             </a>
 
@@ -82,11 +74,13 @@ export function Navbar() {
               onClick={() => setIsOpen(!isOpen)}
               className="lg:hidden text-white p-1"
               aria-label={isOpen ? "Zamknij menu" : "Otwórz menu"}
+              aria-expanded={isOpen}
+              aria-controls="mobile-menu"
             >
               {isOpen ? (
-                <X className="w-6 h-6" />
+                <X className="w-6 h-6" aria-hidden="true" />
               ) : (
-                <Menu className="w-6 h-6" />
+                <Menu className="w-6 h-6" aria-hidden="true" />
               )}
             </button>
           </div>
@@ -95,7 +89,7 @@ export function Navbar() {
 
       {/* Mobile drawer */}
       {isOpen && (
-        <div className="lg:hidden bg-brand-navy border-t border-blue-900/60">
+        <div id="mobile-menu" role="navigation" aria-label="Menu mobilne" className="lg:hidden bg-brand-navy border-t border-blue-900/60">
           <div className="px-4 py-5 space-y-1">
             {navLinks.map((link) => (
               <Link
@@ -112,7 +106,7 @@ export function Navbar() {
                 href={`tel:${COMPANY.phone}`}
                 className="flex items-center gap-2 text-gray-300 hover:text-white text-base"
               >
-                <Phone className="w-4 h-4" />
+                <Phone className="w-4 h-4" aria-hidden="true" />
                 {COMPANY.phoneDisplay}
               </a>
               <Link
