@@ -1,4 +1,4 @@
-const foundingYear = 2013;
+const foundingYear = 2015;
 
 export const COMPANY = {
   name: "Biuro Nieruchomości PRYZMAT",
