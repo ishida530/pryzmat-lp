@@ -64,7 +64,7 @@ async function ListingDetailContent({ slug }: { slug: string }) {
   const offer = await getListingBySlug(slug);
   if (!offer) notFound();
 
-  const similarOffers = await getSimilarListings(Number(slug), 3);
+  const similarOffers = await getSimilarListings(offer.id, 3);
 
   return (
     <>
