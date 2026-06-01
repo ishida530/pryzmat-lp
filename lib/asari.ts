@@ -1,4 +1,5 @@
 import { cache } from "react";
+import { unstable_cache } from "next/cache";
 import type { Offer } from "@/components/sections/OffersClient";
 
 const BASE_URL = "https://api.asari.pro/site";
@@ -9,7 +10,7 @@ function buildHeaders(): HeadersInit {
   return { SiteAuth: `${userId}:${token}` };
 }
 
-const delay = (ms: number) => new Promise<void>((r) => setTimeout(r, ms));
+const delay = (ms: number) => new Promise<void>((r) => setTimeout(r, ms)); // used by 429 retry
 
 // Asari Site API: POST with multipart/form-data + SiteAuth header.
 // Retries automatically on 429 (rate limit exceeded).
@@ -245,87 +246,75 @@ export function mapToOffer(listing: AsariListing): Offer {
 }
 
 // ---------------------------------------------------------------------------
-// globalThis caches
+// Persistent Data Cache (Next.js unstable_cache)
+//
+// ASARI documentation: "The data downloaded by API should be saved to a local
+// database. Web pages should display data from database prepared in that way."
+//
+// unstable_cache IS that local database — it persists across server restarts,
+// Vercel cold starts, and dev HMR reloads. Individual listings are cached by
+// their ID + lastUpdated, so only truly changed listings ever hit the API.
+// React cache() deduplicates within a single render on top of that.
 // ---------------------------------------------------------------------------
 
-declare global {
-  // eslint-disable-next-line no-var
-  var __asariIdsCache: { data: AsariListingRef[]; expires: number } | undefined;
-  // eslint-disable-next-line no-var
-  var __asariListingCache:
-    | Map<number, { data: AsariListing; lastUpdated: string }>
-    | undefined;
-}
+// Each individual listing is cached under a key that includes lastUpdated.
+// When lastUpdated changes in ASARI, the key changes → fresh fetch.
+// When it stays the same → Next.js serves the stored value instantly.
+const fetchListingCached = (id: number, lastUpdated: string) =>
+  unstable_cache(
+    () => asariPost<AsariListing>("/listing", { id: String(id) }),
+    [`listing-${id}-${lastUpdated}`],
+    { revalidate: 600, tags: ["listings"] }
+  )();
 
-async function fetchListingIds(): Promise<AsariListingRef[]> {
-  const now = Date.now();
-  if (globalThis.__asariIdsCache && now < globalThis.__asariIdsCache.expires) {
-    return globalThis.__asariIdsCache.data;
-  }
-  // closedDays/blockedDays include recently sold and reserved listings so we
-  // can show SPRZEDANE / ZAREZERWOWANE badges on the site.
-  const data = await asariPost<AsariListingRef[]>("/exportedListingIdList", {
-    closedDays: "30",
-    blockedDays: "30",
-  });
-  globalThis.__asariIdsCache = { data, expires: now + 60_000 };
-  return data;
-}
-
-export const getListingIds = cache(fetchListingIds);
-
-export const getListing = cache(
-  async (id: number): Promise<AsariListing> =>
-    asariPost<AsariListing>("/listing", { id: String(id) })
+// Listing IDs list is cached for 60 s — short enough to pick up new listings
+// quickly, long enough to avoid hammering the API on rapid page navigations.
+const fetchListingIdsCached = unstable_cache(
+  () =>
+    asariPost<AsariListingRef[]>("/exportedListingIdList", {
+      closedDays: "30",
+      blockedDays: "30",
+    }),
+  ["listing-ids"],
+  { revalidate: 60, tags: ["listing-ids"] }
 );
 
-// getAllListings fetches every exported listing while respecting the 25-req/min
-// ASARI rate limit (3.5 s between individual /listing calls). A per-listing
-// globalThis cache keyed on lastUpdated means unchanged listings are served
-// from memory — only new or updated ones hit the API.
+export const getListingIds = cache(fetchListingIdsCached);
+
+// getListing: used on detail pages. Cached individually by id+lastUpdated via
+// fetchListingCached; React cache() deduplicates within a render.
+export const getListing = cache(async (id: number): Promise<AsariListing> => {
+  // Fetch the ID list first to get the current lastUpdated for this listing.
+  // Both calls hit Next.js Data Cache — no extra API requests.
+  const refs = await getListingIds();
+  const ref  = refs.find((r) => r.id === id);
+  if (ref) return fetchListingCached(ref.id, ref.lastUpdated);
+  // Listing not in exported list (e.g. direct URL access) — fetch without cache key
+  return asariPost<AsariListing>("/listing", { id: String(id) });
+});
+
+// getAllListings: fetches every exported listing.
+// Warm cache → all resolved from Next.js Data Cache instantly, no API calls.
+// Cold cache → all fired in parallel; asariPost retries 429s automatically.
 export const getAllListings = cache(async (): Promise<AsariListing[]> => {
   const refs = await getListingIds();
-  console.log(`[ASARI] exportedListingIdList returned ${refs.length} IDs:`, refs.map(r => r.id));
 
-  if (!globalThis.__asariListingCache) {
-    globalThis.__asariListingCache = new Map();
-  }
-  const perListingCache = globalThis.__asariListingCache;
+  const settled = await Promise.allSettled(
+    refs.map((ref) => fetchListingCached(ref.id, ref.lastUpdated))
+  );
 
   const results: AsariListing[] = [];
-  let fetchCount = 0;
-
-  for (const ref of refs) {
-    const cached = perListingCache.get(ref.id);
-
-    if (cached?.lastUpdated === ref.lastUpdated) {
-      console.log(`[ASARI] listing ${ref.id} (${cached.data.section}) — from cache`);
-      results.push(cached.data);
-      continue;
-    }
-
-    if (fetchCount > 0) await delay(3_500);
-    fetchCount++;
-
-    try {
-      const listing = await asariPost<AsariListing>("/listing", { id: String(ref.id) });
-      console.log(`[ASARI] listing ${ref.id} (${listing.section}) — fetched OK`);
-      perListingCache.set(ref.id, { data: listing, lastUpdated: ref.lastUpdated });
-      results.push(listing);
-    } catch (err) {
-      console.error(`[ASARI] listing ${ref.id} fetch FAILED:`, err);
-      if (cached) results.push(cached.data);
-    }
+  for (const r of settled) {
+    if (r.status === "fulfilled") results.push(r.value);
+    else console.error("[ASARI] listing fetch failed:", r.reason);
   }
-
-  console.log(`[ASARI] getAllListings → ${results.length} listings total`);
   return results;
 });
 
-export const getUsers = cache(async (): Promise<AsariUser[]> => {
-  return asariPost<AsariUser[]>("/user/list", {
-    active: "1",
-    start: "0",
-    limit: "200",
-  });
-});
+export const getUsers = cache(
+  unstable_cache(
+    () => asariPost<AsariUser[]>("/user/list", { active: "1", start: "0", limit: "200" }),
+    ["users"],
+    { revalidate: 3600, tags: ["users"] }
+  )
+);
