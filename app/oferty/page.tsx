@@ -1,7 +1,9 @@
+import { Suspense } from "react";
 import type { Metadata } from "next";
 import { createMetadata } from "@/lib/seo";
 import Image from "next/image";
 import { OffersClient } from "@/components/sections/OffersClient";
+import { OffersSkeleton } from "@/components/sections/OffersSkeleton";
 import { getAllListings, mapToOffer } from "@/lib/asari";
 
 export const revalidate = 600;
@@ -12,10 +14,13 @@ export const metadata: Metadata = createMetadata(
   "/oferty"
 );
 
-export default async function OfertyPage() {
+async function OffersServerList() {
   const listings = await getAllListings();
   const offers = listings.map(mapToOffer);
+  return <OffersClient offers={offers} />;
+}
 
+export default function OfertyPage() {
   return (
     <div className="min-h-screen bg-gray-50">
 
@@ -52,7 +57,9 @@ export default async function OfertyPage() {
         </div>
       </div>
 
-      <OffersClient offers={offers} />
+      <Suspense fallback={<OffersSkeleton />}>
+        <OffersServerList />
+      </Suspense>
 
     </div>
   );
