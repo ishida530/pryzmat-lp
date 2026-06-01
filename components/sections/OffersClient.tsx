@@ -7,32 +7,42 @@ import { SlidersHorizontal, Search, MapPin, Home, ArrowRight } from "lucide-reac
 export interface Offer {
   id: number;
   slug: string;
+  status: string;
+  listingId?: string;
   type: string;
   title: string;
   description: string;
   location: string;
   address?: string;
   price: number;
+  priceM2?: number;
   area: number;
   unit: string;
   purpose: "sprzedaz" | "wynajem";
   rooms?: number;
   bathrooms?: number;
+  floor?: number;
+  totalFloors?: number;
   features?: string[];
   imageUrl?: string;
+  thumbnailUrl?: string;
+  allPhotoIds: number[];
+  geoLat?: number;
+  geoLng?: number;
+  agent?: {
+    firstName: string;
+    lastName: string;
+    email?: string;
+    phoneNumber?: string;
+    imageId?: number | null;
+  };
+  nestedListings?: Array<{ id: number; listingId: string }>;
 }
 
-const typeOptions = ["Wszystkie", "Mieszkanie", "Dom", "Działka"];
 const purposeOptions = [
   { value: "all", label: "Sprzedaż i wynajem" },
   { value: "sprzedaz", label: "Na sprzedaż" },
   { value: "wynajem", label: "Na wynajem" },
-];
-const locationOptions = [
-  { value: "all", label: "Wszystkie lokalizacje" },
-  { value: "Barczewo", label: "Barczewo" },
-  { value: "Olsztyn", label: "Olsztyn" },
-  { value: "Powiat olsztyński", label: "Powiat olsztyński" },
 ];
 
 function formatPrice(price: number) {
@@ -47,6 +57,22 @@ export function OffersClient({ offers }: { offers: Offer[] }) {
   const [selectedType, setSelectedType] = useState("Wszystkie");
   const [selectedPurpose, setSelectedPurpose] = useState("all");
   const [selectedLocation, setSelectedLocation] = useState("all");
+
+  // Build type and location options dynamically from actual data
+  const typeOptions = useMemo(() => {
+    const types = Array.from(new Set(offers.map((o) => o.type))).sort();
+    return ["Wszystkie", ...types];
+  }, [offers]);
+
+  const locationOptions = useMemo(() => {
+    const cities = Array.from(
+      new Set(offers.map((o) => o.location).filter((l) => l !== "—"))
+    ).sort();
+    return [
+      { value: "all", label: "Wszystkie lokalizacje" },
+      ...cities.map((c) => ({ value: c, label: c })),
+    ];
+  }, [offers]);
 
   const filtered = useMemo(() => {
     return offers.filter((o) => {
@@ -149,21 +175,37 @@ export function OffersClient({ offers }: { offers: Offer[] }) {
               href={`/oferty/${offer.slug}`}
               className="bg-white rounded-xl border border-gray-100 shadow-sm hover:shadow-md hover:-translate-y-1 transition-all duration-200 overflow-hidden group"
             >
-              {/* Image placeholder */}
+              {/* Image */}
               <div className="h-44 bg-gradient-to-br from-brand-navy/10 to-brand-blue/10 flex items-center justify-center relative overflow-hidden">
-                {offer.imageUrl ? (
+                {offer.thumbnailUrl ? (
                   <>
-                    <img 
-                      src={offer.imageUrl} 
+                    <img
+                      src={offer.thumbnailUrl}
                       alt={offer.title}
-                      className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-300"
+                      className={`w-full h-full object-cover transition-transform duration-300 ${offer.status === "Active" ? "group-hover:scale-110" : ""}`}
                     />
-                    {/* Overlay layer for consistency with homepage */}
                     <div className="absolute inset-0 bg-gradient-to-br from-brand-navy/15 via-transparent to-brand-navy/10 pointer-events-none" />
                   </>
                 ) : (
                   <Home className="w-10 h-10 text-brand-navy/30" />
                 )}
+
+                {/* Sold / Reserved overlay */}
+                {offer.status === "Closed" && (
+                  <div className="absolute inset-0 bg-gray-900/60 flex items-center justify-center">
+                    <span className="bg-gray-700 text-white text-xs font-extrabold px-3 py-1.5 rounded-full tracking-widest uppercase">
+                      Sprzedane
+                    </span>
+                  </div>
+                )}
+                {offer.status === "Pending" && (
+                  <div className="absolute inset-0 bg-amber-900/40 flex items-center justify-center">
+                    <span className="bg-amber-600 text-white text-xs font-extrabold px-3 py-1.5 rounded-full tracking-widest uppercase">
+                      Zarezerwowane
+                    </span>
+                  </div>
+                )}
+
                 <span className="absolute top-3 left-3 bg-brand-navy text-white text-[11px] font-bold px-2.5 py-1 rounded-full">
                   {offer.type}
                 </span>

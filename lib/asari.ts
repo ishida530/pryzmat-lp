@@ -9,10 +9,15 @@ function buildHeaders(): HeadersInit {
   return { SiteAuth: `${userId}:${token}` };
 }
 
+const delay = (ms: number) => new Promise<void>((r) => setTimeout(r, ms));
+
 // Asari Site API: POST with multipart/form-data + SiteAuth header.
-// A dummy field ensures fetch generates a proper multipart boundary.
-// Response format: { success: boolean, data: T }
-async function asariPost<T>(path: string, queryParams?: Record<string, string>): Promise<T> {
+// Retries automatically on 429 (rate limit exceeded).
+async function asariPost<T>(
+  path: string,
+  queryParams?: Record<string, string>,
+  retries = 3
+): Promise<T> {
   const url = new URL(`${BASE_URL}${path}`);
   if (queryParams) {
     for (const [k, v] of Object.entries(queryParams)) url.searchParams.set(k, v);
@@ -25,9 +30,14 @@ async function asariPost<T>(path: string, queryParams?: Record<string, string>):
     method: "POST",
     headers: buildHeaders(),
     body,
-    // Next.js ISR caches the full page — no fetch-level cache needed for POST
     cache: "no-store",
   });
+
+  if (res.status === 429 && retries > 0) {
+    console.warn(`[ASARI] 429 rate limit on ${path}, retrying in 10s… (${retries} left)`);
+    await delay(10_000);
+    return asariPost<T>(path, queryParams, retries - 1);
+  }
 
   if (!res.ok) throw new Error(`Asari ${res.status} ${res.statusText} — ${path}`);
 
@@ -37,7 +47,7 @@ async function asariPost<T>(path: string, queryParams?: Record<string, string>):
 }
 
 // ---------------------------------------------------------------------------
-// Raw API types (based on real API responses)
+// Raw API types
 // ---------------------------------------------------------------------------
 
 export interface AsariListingRef {
@@ -58,24 +68,40 @@ export interface AsariImage {
 
 export interface AsariLocation {
   id: number;
-  name: string;       // full path, e.g. "/Warmińsko-Mazurskie/Olsztyński/Barczewo/Mokiny"
+  name: string;
   province: string;
-  locality: string;   // the city/village name we actually display
+  locality: string;
   quarter: string;
+}
+
+export interface AsariAgent {
+  id: number;
+  firstName: string;
+  lastName: string;
+  email?: string;
+  phoneNumber?: string;
+  skypeUser?: string;
+  imageId?: number | null;
+}
+
+export interface AsariUser extends AsariAgent {
+  userType?: string;
+  active?: boolean;
 }
 
 export interface AsariListing {
   id: number;
   section: string;
   status: string;
+  listingId?: string;
   headerAdvertisement: string;
   description?: string;
   englishDescription?: string;
   price: AsariPrice;
   priceM2?: AsariPrice;
-  lotArea?: number;     // plots / land
-  totalArea?: number;   // apartments, houses (gross)
-  livingArea?: number;  // apartments (net)
+  lotArea?: number;
+  totalArea?: number;
+  livingArea?: number;
   location?: AsariLocation;
   geoLat?: number;
   geoLng?: number;
@@ -87,16 +113,9 @@ export interface AsariListing {
   images?: AsariImage[];
   availableNeighborhoodList?: string[];
   communicationList?: string[];
-  agent?: {
-    id: number;
-    firstName: string;
-    lastName: string;
-    email?: string;
-    phoneNumber?: string;
-    imageId?: number | null;
-  };
-  parentListing?: number | null;
-  listingId?: string;
+  agent?: AsariAgent;
+  parentListing?: { id: number; listingId: string; name: string } | null;
+  nestedListings?: Array<{ id: number; listingId: string }>;
 }
 
 // ---------------------------------------------------------------------------
@@ -104,17 +123,22 @@ export interface AsariListing {
 // ---------------------------------------------------------------------------
 
 const SECTION_MAP: Record<string, { type: string; purpose: "sprzedaz" | "wynajem" }> = {
-  ApartmentSale:    { type: "Mieszkanie", purpose: "sprzedaz" },
-  ApartmentRental:  { type: "Mieszkanie", purpose: "wynajem" },
-  HouseSale:        { type: "Dom",        purpose: "sprzedaz" },
-  HouseRental:      { type: "Dom",        purpose: "wynajem" },
-  LotSale:          { type: "Działka",    purpose: "sprzedaz" },
-  LotRental:        { type: "Działka",    purpose: "wynajem" },
-  CommercialSale:   { type: "Lokal",      purpose: "sprzedaz" },
-  CommercialRental: { type: "Lokal",      purpose: "wynajem" },
+  ApartmentSale:          { type: "Mieszkanie", purpose: "sprzedaz" },
+  ApartmentRental:        { type: "Mieszkanie", purpose: "wynajem" },
+  HouseSale:              { type: "Dom",        purpose: "sprzedaz" },
+  HouseRental:            { type: "Dom",        purpose: "wynajem" },
+  LotSale:                { type: "Działka",    purpose: "sprzedaz" },
+  LotRental:              { type: "Działka",    purpose: "wynajem" },
+  CommercialSpaceSale:    { type: "Lokal",      purpose: "sprzedaz" },
+  CommercialSpaceRental:  { type: "Lokal",      purpose: "wynajem" },
+  CommercialObjectSale:   { type: "Lokal",      purpose: "sprzedaz" },
+  CommercialObjectRental: { type: "Lokal",      purpose: "wynajem" },
+  WarehouseSale:          { type: "Magazyn",    purpose: "sprzedaz" },
+  WarehouseRental:        { type: "Magazyn",    purpose: "wynajem" },
+  Investment:             { type: "Inwestycja", purpose: "sprzedaz" },
+  RoomRental:             { type: "Pokój",      purpose: "wynajem" },
 };
 
-// English feature labels returned by Asari → Polish display
 const FEATURE_LABELS: Record<string, string> = {
   Playground:   "Plac zabaw",
   Restaurant:   "Restauracja",
@@ -144,7 +168,6 @@ export function asariThumbnailUrl(imageId: number): string {
   return `https://img.asariweb.pl/thumbnail/${imageId}`;
 }
 
-// Strips HTML tags and decodes common entities from Asari descriptions
 function stripHtml(html: string): string {
   return html
     .replace(/<br\s*\/?>/gi, " ")
@@ -158,7 +181,7 @@ function stripHtml(html: string): string {
 }
 
 // ---------------------------------------------------------------------------
-// Mapper: AsariListing → Offer (UI type used by OffersClient)
+// Mapper: AsariListing → Offer
 // ---------------------------------------------------------------------------
 
 export function mapToOffer(listing: AsariListing): Offer {
@@ -168,15 +191,14 @@ export function mapToOffer(listing: AsariListing): Offer {
   };
 
   const city = listing.location?.locality ?? "—";
-
-  // Area field differs by section
   const area = listing.lotArea ?? listing.totalArea ?? listing.livingArea ?? 0;
 
-  // Exclude floor-plan images (isScheme = true)
   const photoIds = (listing.images ?? [])
     .filter((img) => !img.isScheme)
     .map((img) => img.id);
-  const imageUrl = photoIds.length > 0 ? asariImageUrl(photoIds[0]) : undefined;
+
+  const imageUrl     = photoIds.length > 0 ? asariImageUrl(photoIds[0])     : undefined;
+  const thumbnailUrl = photoIds.length > 0 ? asariThumbnailUrl(photoIds[0]) : undefined;
 
   const description = listing.description ? stripHtml(listing.description) : "";
 
@@ -188,36 +210,51 @@ export function mapToOffer(listing: AsariListing): Offer {
   return {
     id: listing.id,
     slug: String(listing.id),
+    status: listing.status,
+    listingId: listing.listingId,
     type,
     title: listing.headerAdvertisement,
     description,
     location: city,
-    price: listing.price.amount,
+    price: listing.price?.amount ?? 0,
+    priceM2: listing.priceM2?.amount,
     area,
     unit: "m²",
     purpose,
     rooms: listing.rooms ?? undefined,
     bathrooms: listing.bathrooms ?? undefined,
+    floor: listing.floor ?? undefined,
+    totalFloors: listing.totalFloors ?? undefined,
     features: features.length > 0 ? features : undefined,
     imageUrl,
+    thumbnailUrl,
+    allPhotoIds: photoIds,
+    geoLat: listing.geoLat,
+    geoLng: listing.geoLng,
+    agent: listing.agent
+      ? {
+          firstName: listing.agent.firstName,
+          lastName: listing.agent.lastName,
+          email: listing.agent.email,
+          phoneNumber: listing.agent.phoneNumber,
+          imageId: listing.agent.imageId,
+        }
+      : undefined,
+    nestedListings: listing.nestedListings,
   };
 }
 
 // ---------------------------------------------------------------------------
-// Public API — wrapped with React cache() to deduplicate per-request calls.
-// This prevents 429 rate-limit errors when multiple components call the same
-// function during a single render (e.g. getListing + getAllListings on detail page).
-//
-// getListingIds also uses a module-level 60-second cache so that rapid
-// back-to-back page navigations (including generateStaticParams calls in dev)
-// don't hit the API repeatedly and trigger 429.
+// globalThis caches
 // ---------------------------------------------------------------------------
 
-// globalThis persists across HMR hot-reloads in Next.js dev mode.
-// In production the module is long-lived anyway so a plain variable works too.
 declare global {
   // eslint-disable-next-line no-var
   var __asariIdsCache: { data: AsariListingRef[]; expires: number } | undefined;
+  // eslint-disable-next-line no-var
+  var __asariListingCache:
+    | Map<number, { data: AsariListing; lastUpdated: string }>
+    | undefined;
 }
 
 async function fetchListingIds(): Promise<AsariListingRef[]> {
@@ -225,7 +262,12 @@ async function fetchListingIds(): Promise<AsariListingRef[]> {
   if (globalThis.__asariIdsCache && now < globalThis.__asariIdsCache.expires) {
     return globalThis.__asariIdsCache.data;
   }
-  const data = await asariPost<AsariListingRef[]>("/exportedListingIdList");
+  // closedDays/blockedDays include recently sold and reserved listings so we
+  // can show SPRZEDANE / ZAREZERWOWANE badges on the site.
+  const data = await asariPost<AsariListingRef[]>("/exportedListingIdList", {
+    closedDays: "30",
+    blockedDays: "30",
+  });
   globalThis.__asariIdsCache = { data, expires: now + 60_000 };
   return data;
 }
@@ -237,18 +279,53 @@ export const getListing = cache(
     asariPost<AsariListing>("/listing", { id: String(id) })
 );
 
+// getAllListings fetches every exported listing while respecting the 25-req/min
+// ASARI rate limit (3.5 s between individual /listing calls). A per-listing
+// globalThis cache keyed on lastUpdated means unchanged listings are served
+// from memory — only new or updated ones hit the API.
 export const getAllListings = cache(async (): Promise<AsariListing[]> => {
   const refs = await getListingIds();
-  const BATCH = 5;
-  const results: AsariListing[] = [];
+  console.log(`[ASARI] exportedListingIdList returned ${refs.length} IDs:`, refs.map(r => r.id));
 
-  for (let i = 0; i < refs.length; i += BATCH) {
-    const batch = refs.slice(i, i + BATCH);
-    const settled = await Promise.allSettled(batch.map((r) => getListing(r.id)));
-    for (const r of settled) {
-      if (r.status === "fulfilled") results.push(r.value);
+  if (!globalThis.__asariListingCache) {
+    globalThis.__asariListingCache = new Map();
+  }
+  const perListingCache = globalThis.__asariListingCache;
+
+  const results: AsariListing[] = [];
+  let fetchCount = 0;
+
+  for (const ref of refs) {
+    const cached = perListingCache.get(ref.id);
+
+    if (cached?.lastUpdated === ref.lastUpdated) {
+      console.log(`[ASARI] listing ${ref.id} (${cached.data.section}) — from cache`);
+      results.push(cached.data);
+      continue;
+    }
+
+    if (fetchCount > 0) await delay(3_500);
+    fetchCount++;
+
+    try {
+      const listing = await asariPost<AsariListing>("/listing", { id: String(ref.id) });
+      console.log(`[ASARI] listing ${ref.id} (${listing.section}) — fetched OK`);
+      perListingCache.set(ref.id, { data: listing, lastUpdated: ref.lastUpdated });
+      results.push(listing);
+    } catch (err) {
+      console.error(`[ASARI] listing ${ref.id} fetch FAILED:`, err);
+      if (cached) results.push(cached.data);
     }
   }
 
+  console.log(`[ASARI] getAllListings → ${results.length} listings total`);
   return results;
+});
+
+export const getUsers = cache(async (): Promise<AsariUser[]> => {
+  return asariPost<AsariUser[]>("/user/list", {
+    active: "1",
+    start: "0",
+    limit: "200",
+  });
 });

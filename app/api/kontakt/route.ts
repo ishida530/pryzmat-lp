@@ -2,6 +2,50 @@ import { NextRequest, NextResponse } from "next/server";
 import nodemailer from "nodemailer";
 import { COMPANY } from "@/lib/constants";
 
+// Creates a lead in ASARI CRM. Runs fire-and-forget — never blocks the response.
+async function createAsariLead(body: Record<string, string>) {
+  const userId = process.env.ASARI_USER_ID;
+  const token  = process.env.ASARI_TOKEN;
+  if (!userId || !token) return;
+
+  try {
+    // firstName / lastName: split on first space if possible
+    const nameParts = (body.imie ?? "").trim().split(/\s+/);
+    const firstName = nameParts[0] ?? body.imie;
+    const lastName  = nameParts.slice(1).join(" ") || undefined;
+
+    const params = new URLSearchParams();
+    params.set("customerType",            "Lead");
+    params.set("firstName",               firstName);
+    if (lastName) params.set("lastName",  lastName);
+    params.set("customerFrom",            "Internet");
+    params.set("phones[0].phoneNumber",   body.telefon ?? "");
+    if (body.email) params.set("emails[0].email", body.email);
+
+    const res = await fetch("https://api.asari.pro/site/customer/create", {
+      method:  "POST",
+      headers: {
+        "SiteAuth":     `${userId}:${token}`,
+        "Content-Type": "application/x-www-form-urlencoded",
+      },
+      body: params.toString(),
+    });
+
+    if (!res.ok) {
+      console.warn("[ASARI lead] HTTP", res.status, await res.text());
+    } else {
+      const json = await res.json();
+      if (json.success) {
+        console.log("[ASARI lead] created customer id:", json.data);
+      } else {
+        console.warn("[ASARI lead] API error:", json.error);
+      }
+    }
+  } catch (err) {
+    console.warn("[ASARI lead] request failed:", err);
+  }
+}
+
 const fieldLabels: Record<string, string> = {
   imie: "Imię",
   telefon: "Telefon",
@@ -108,6 +152,9 @@ export async function POST(request: NextRequest) {
         buildText(body)
       );
     }
+
+    // Fire-and-forget: create lead in ASARI CRM without blocking the response
+    createAsariLead(body);
 
     return NextResponse.json({ success: true });
   } catch (error) {

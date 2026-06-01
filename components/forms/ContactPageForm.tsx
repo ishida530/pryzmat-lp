@@ -241,19 +241,35 @@ export function ContactPageForm() {
           </div>
         </div>
 
-        {/* Map placeholder — FAZA 3: Replace with Google Maps embed */}
-        <a
-          href={`https://maps.google.com/?q=${encodeURIComponent(COMPANY.address.full)}`}
-          target="_blank"
-          rel="noopener noreferrer"
-          className="flex rounded-2xl overflow-hidden border border-gray-100 h-52 bg-brand-light-blue items-center justify-center hover:opacity-90 transition-opacity"
-        >
-          <div className="text-center">
-            <MapPin className="w-10 h-10 text-brand-blue mx-auto mb-3" />
-            <p className="font-semibold text-brand-navy text-sm">Otwórz w Mapach Google</p>
-            <p className="text-gray-500 text-xs mt-1">{COMPANY.address.full}</p>
-          </div>
-        </a>
+        {/* Office map — OpenStreetMap embed */}
+        <div className="rounded-2xl overflow-hidden border border-gray-100 shadow-sm">
+          {(() => {
+            const { geoLat: lat, geoLng: lng } = COMPANY.address;
+            const delta = 0.006;
+            const bbox  = `${lng - delta},${lat - delta},${lng + delta},${lat + delta}`;
+            const src   = `https://www.openstreetmap.org/export/embed.html?bbox=${bbox}&layer=mapnik&marker=${lat},${lng}`;
+            const link  = `https://www.openstreetmap.org/?mlat=${lat}&mlon=${lng}#map=15/${lat}/${lng}`;
+            return (
+              <>
+                <iframe
+                  src={src}
+                  title="Lokalizacja biura PRYZMAT"
+                  className="w-full h-52 block"
+                  loading="lazy"
+                />
+                <a
+                  href={link}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="flex items-center gap-2 px-4 py-2 bg-white border-t border-gray-100 text-brand-blue text-xs hover:bg-gray-50 transition-colors"
+                >
+                  <MapPin className="w-3.5 h-3.5 shrink-0" />
+                  {COMPANY.address.full} — Otwórz w OpenStreetMap →
+                </a>
+              </>
+            );
+          })()}
+        </div>
       </div>
 
     </div>
