@@ -183,6 +183,32 @@ function stripHtml(html: string): string {
 }
 
 // ---------------------------------------------------------------------------
+// Slug helpers
+// ---------------------------------------------------------------------------
+
+function slugify(text: string): string {
+  return text
+    .toLowerCase()
+    .replace(/ą/g, "a").replace(/ę/g, "e").replace(/ó/g, "o")
+    .replace(/ś/g, "s").replace(/ź/g, "z").replace(/ż/g, "z")
+    .replace(/ć/g, "c").replace(/ń/g, "n").replace(/ł/g, "l")
+    .replace(/[^a-z0-9]+/g, "-")
+    .replace(/^-+|-+$/g, "");
+}
+
+function buildSlug(listing: AsariListing): string {
+  const { type, purpose } = SECTION_MAP[listing.section] ?? {
+    type: listing.section,
+    purpose: "sprzedaz" as const,
+  };
+  const city = listing.location?.locality ?? "";
+  const purposeSlug = purpose === "sprzedaz" ? "sprzedaz" : "wynajem";
+  return [slugify(type), purposeSlug, slugify(city), listing.id]
+    .filter(Boolean)
+    .join("-");
+}
+
+// ---------------------------------------------------------------------------
 // Mapper: AsariListing → Offer
 // ---------------------------------------------------------------------------
 
@@ -211,7 +237,7 @@ export function mapToOffer(listing: AsariListing): Offer {
 
   return {
     id: listing.id,
-    slug: String(listing.id),
+    slug: buildSlug(listing),
     status: listing.status,
     listingId: listing.listingId,
     type,

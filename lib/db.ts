@@ -96,6 +96,20 @@ const _queryListing = unstable_cache(
   { revalidate: 1800, tags: ["listings"] }
 );
 
+const _queryListingBySlug = unstable_cache(
+  async (slug: string): Promise<DbListing | null> => {
+    const { data, error } = await supabase
+      .from("listings")
+      .select("*")
+      .eq("slug", slug)
+      .maybeSingle();
+    if (error) throw new Error(`[db] getListingBySlug ${slug}: ${error.message}`);
+    return (data as DbListing | null);
+  },
+  ["db-listing-by-slug"],
+  { revalidate: 1800, tags: ["listings"] }
+);
+
 const _querySimilarListings = unstable_cache(
   async (excludeId: number, limit: number): Promise<DbListing[]> => {
     const { data, error } = await supabase
@@ -121,6 +135,15 @@ export async function getAllListings(): Promise<Offer[]> {
 export async function getListing(id: number): Promise<Offer | null> {
   const row = await _queryListing(id);
   return row ? toOffer(row) : null;
+}
+
+export async function getListingBySlug(slug: string): Promise<Offer | null> {
+  const row = await _queryListingBySlug(slug);
+  if (row) return toOffer(row);
+  // Backward compat: old URLs used the numeric ASARI ID as slug
+  const numericId = /^\d+$/.test(slug) ? Number(slug) : NaN;
+  if (!isNaN(numericId)) return getListing(numericId);
+  return null;
 }
 
 export async function getSimilarListings(excludeId: number, limit = 3): Promise<Offer[]> {

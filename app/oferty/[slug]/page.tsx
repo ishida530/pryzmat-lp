@@ -17,7 +17,7 @@ import {
   Layers,
 } from "lucide-react";
 import { COMPANY } from "@/lib/constants";
-import { getListing, getSimilarListings, getAllListingIds } from "@/lib/db";
+import { getListingBySlug, getSimilarListings } from "@/lib/db";
 import { ListingDetailSkeleton } from "@/components/sections/ListingDetailSkeleton";
 import { ImageGallery } from "@/components/sections/ImageGallery";
 import { ListingMap } from "@/components/sections/ListingMap";
@@ -31,7 +31,7 @@ interface OfferDetailPageProps {
 }
 
 export async function generateMetadata({ params }: OfferDetailPageProps): Promise<Metadata> {
-  const offer = await getListing(Number(params.slug));
+  const offer = await getListingBySlug(params.slug);
   if (!offer) {
     return createMetadata(
       "Oferta nie znaleziona",
@@ -61,7 +61,7 @@ function formatPrice(price: number) {
 }
 
 async function ListingDetailContent({ slug }: { slug: string }) {
-  const offer = await getListing(Number(slug));
+  const offer = await getListingBySlug(slug);
   if (!offer) notFound();
 
   const similarOffers = await getSimilarListings(Number(slug), 3);
