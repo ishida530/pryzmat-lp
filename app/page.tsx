@@ -36,8 +36,8 @@ const localBusinessSchema = {
   },
   geo: {
     "@type": "GeoCoordinates",
-    latitude: 53.8267,
-    longitude: 20.6898,
+    latitude: COMPANY.address.geoLat,
+    longitude: COMPANY.address.geoLng,
   },
   telephone: COMPANY.phone,
   email: COMPANY.email,
@@ -61,13 +61,19 @@ const localBusinessSchema = {
       "@type": "OpeningHoursSpecification",
       dayOfWeek: ["Monday", "Tuesday", "Wednesday", "Thursday", "Friday"],
       opens: "09:00",
-      closes: "17:00",
+      closes: "20:00",
     },
     {
       "@type": "OpeningHoursSpecification",
       dayOfWeek: "Saturday",
       opens: "10:00",
-      closes: "14:00",
+      closes: "15:00",
+    },
+    {
+      "@type": "OpeningHoursSpecification",
+      dayOfWeek: "Sunday",
+      opens: "09:00",
+      closes: "16:00",
     },
   ],
 };

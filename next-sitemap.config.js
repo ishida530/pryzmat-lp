@@ -1,6 +1,6 @@
 /** @type {import('next-sitemap').IConfig} */
 module.exports = {
-  siteUrl: process.env.SITE_URL || "https://pryzmat.com.pl",
+  siteUrl: process.env.SITE_URL || "https://www.pryzmatnieruchomosci.pl",
   generateRobotsTxt: true,
   robotsTxtOptions: {
     policies: [
@@ -11,6 +11,10 @@ module.exports = {
   priority: 0.7,
   sitemapSize: 5000,
   exclude: ["/api/*", "/polityka-prywatnosci", "/rodo"],
+  additionalPaths: async (config) => [
+    await config.transform(config, "/oferty"),
+    await config.transform(config, "/zespol"),
+  ],
   transform: async (config, path) => {
     const priorities = {
       "/": 1.0,
@@ -18,6 +22,7 @@ module.exports = {
       "/zarzadzanie-najmem": 0.9,
       "/kontakt": 0.8,
       "/o-nas": 0.7,
+      "/zespol": 0.6,
     };
     return {
       loc: path,

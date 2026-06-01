@@ -136,7 +136,7 @@ export async function POST(request: NextRequest) {
 
       await transporter.sendMail({
         from: `"Formularz PRYZMAT" <${process.env.SMTP_FROM ?? process.env.SMTP_USER}>`,
-        to: process.env.SMTP_TO ?? COMPANY.email,
+        to: process.env.SMTP_TO ?? COMPANY.formEmail,
         replyTo: body.email || undefined,
         subject,
         html: buildHtml(body, subject),

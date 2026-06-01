@@ -30,9 +30,9 @@ export const metadata: Metadata = {
   },
   other: {
     "geo.region": "PL-WN",
-    "geo.placename": "Barczewo, warmińsko-mazurskie",
-    "geo.position": "53.8267;20.6898",
-    ICBM: "53.8267, 20.6898",
+    "geo.placename": `${COMPANY.address.city}, ${COMPANY.address.region}`,
+    "geo.position": `${COMPANY.address.geoLat};${COMPANY.address.geoLng}`,
+    ICBM: `${COMPANY.address.geoLat}, ${COMPANY.address.geoLng}`,
   },
 };
 

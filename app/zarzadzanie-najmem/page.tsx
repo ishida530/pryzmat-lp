@@ -29,15 +29,15 @@ const serviceSchema = {
     "Kompleksowe zarządzanie najmem nieruchomości: weryfikacja najemców, obsługa płatności, reakcja na awarie, miesięczne rozliczenia. Barczewo, Olsztyn i powiat olsztyński.",
   provider: {
     "@type": "LocalBusiness",
-    name: "Biuro Nieruchomości PRYZMAT",
-    url: "https://pryzmat.com.pl",
-    telephone: "+48503397360",
+    name: COMPANY.name,
+    url: COMPANY.website,
+    telephone: COMPANY.phone,
     address: {
       "@type": "PostalAddress",
-      streetAddress: "Barczewko 126B",
-      addressLocality: "Barczewo",
-      postalCode: "11-010",
-      addressCountry: "PL",
+      streetAddress: COMPANY.address.street,
+      addressLocality: COMPANY.address.city,
+      postalCode: COMPANY.address.postalCode,
+      addressCountry: COMPANY.address.country,
     },
   },
   areaServed: [
@@ -55,7 +55,7 @@ const serviceSchema = {
     },
     availability: "https://schema.org/InStock",
   },
-  url: "https://pryzmat.com.pl/zarzadzanie-najmem",
+  url: `${COMPANY.website}/zarzadzanie-najmem`,
 };
 
 const steps = [

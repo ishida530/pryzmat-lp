@@ -11,14 +11,14 @@ export const COMPANY = {
     region: "warmińsko-mazurskie",
     country: "PL",
     full: "Barczewko 126B, 11-010 Barczewo",
-    // TODO: replace with exact office coordinates
-    geoLat: 53.8188,
-    geoLng: 20.6921,
+    geoLat: 53.8267,
+    geoLng: 20.6898,
   },
   phone: "+48503397360",
   phoneDisplay: "+48 503 397 360",
-  email: "biuro@marzdom.pl", // REPLACE with actual email
-  website: "https://www.pryzmatnieruchomosci.pl/", // REPLACE with actual domain
+  email: "biuro@marzdom.pl",
+  formEmail: "kontakt@marzdom.pl",
+  website: "https://www.pryzmatnieruchomosci.pl", // REPLACE with actual domain
   hours: {
     weekdays: "Pon–Pt: 9:00–20:00",
     saturday: "Sob: 10:00–15:00",

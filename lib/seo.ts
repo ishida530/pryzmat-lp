@@ -30,7 +30,7 @@ export function createMetadata(
       card: "summary_large_image",
       title: fullTitle,
       description,
-      images: [`${COMPANY.website}/og-image.jpg`],
+      images: [`${COMPANY.website}/opengraph-image`],
     },
     alternates: {
       canonical: url,
