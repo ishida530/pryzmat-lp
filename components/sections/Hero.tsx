@@ -123,7 +123,7 @@ export function Hero() {
                 href="/kontakt?wycena=1"
                 className="inline-flex items-center justify-center bg-transparent text-white border-2 border-white px-8 py-4 rounded-lg text-base font-bold hover:bg-white hover:text-brand-navy transition-all"
               >
-                Bezpłatna wycena nieruchomości
+                Bezpłatna konsultacja
               </Link>
             </div>
 
@@ -269,7 +269,7 @@ export function Hero() {
                       >
                         {loading
                           ? "Wysyłanie…"
-                          : "Umów bezpłatną wycenę →"}
+                          : "Umów konsultację →"}
                       </button>
                     </form>
 

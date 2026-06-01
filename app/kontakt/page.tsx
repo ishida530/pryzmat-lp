@@ -7,7 +7,7 @@ import { COMPANY } from "@/lib/constants";
 
 export const metadata: Metadata = createMetadata(
   "Kontakt — biuro nieruchomości Barczewo i Olsztyn",
-  "Skontaktuj się z biurem nieruchomości PRYZMAT w Barczewie. Telefon, e-mail, formularz kontaktowy. Bezpłatna wycena nieruchomości.",
+  "Skontaktuj się z biurem nieruchomości PRYZMAT w Barczewie. Telefon, e-mail, formularz kontaktowy. Bezpłatna konsultacja.",
   "/kontakt"
 );
 

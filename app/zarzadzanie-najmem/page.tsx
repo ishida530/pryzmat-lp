@@ -232,7 +232,7 @@ export default function ZarzadzanieNajmemPage() {
               {[
                 "Brak opłat za znalezienie najemcy",
                 "Brak ukrytych prowizji",
-                "Bezpłatna wycena na start",
+                "Bezpłatna analiza na start",
                 "Rezygnacja możliwa w każdej chwili",
               ].map((item) => (
                 <li key={item} className="flex items-center gap-3 text-gray-600 text-sm">

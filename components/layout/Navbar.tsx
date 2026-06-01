@@ -75,7 +75,7 @@ export function Navbar() {
               href="/kontakt?wycena=1"
               className="hidden sm:inline-flex items-center bg-brand-red text-white px-4 py-2 rounded-lg text-sm font-bold hover:bg-red-700 transition-colors whitespace-nowrap"
             >
-              Bezpłatna wycena
+              Bezpłatna konsultacja
             </Link>
 
             <button
@@ -120,7 +120,7 @@ export function Navbar() {
                 onClick={() => setIsOpen(false)}
                 className="block bg-brand-red text-white text-center px-4 py-3 rounded-lg font-bold hover:bg-red-700 transition-colors"
               >
-                Bezpłatna wycena
+                Bezpłatna konsultacja
               </Link>
             </div>
           </div>
