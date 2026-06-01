@@ -1,0 +1,36 @@
+<svg width="1200" height="630" viewBox="0 0 1200 630" xmlns="http://www.w3.org/2000/svg" role="img" aria-labelledby="title desc">
+  <title>PRYZMAT Biuro Nieruchomości</title>
+  <desc>Open Graph image for PRYZMAT real estate agency in Barczewo and Olsztyn.</desc>
+  <defs>
+    <linearGradient id="bg" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#0f2444" />
+      <stop offset="55%" stop-color="#1B3A6B" />
+      <stop offset="100%" stop-color="#2E6EC5" />
+    </linearGradient>
+    <linearGradient id="bar" x1="0%" y1="0%" x2="100%" y2="0%">
+      <stop offset="0%" stop-color="#C0392B" />
+      <stop offset="100%" stop-color="#EA5455" />
+    </linearGradient>
+  </defs>
+  <rect width="1200" height="630" fill="url(#bg)" rx="40" />
+  <rect x="0" y="0" width="14" height="630" fill="url(#bar)" rx="7" />
+  <g transform="translate(120 160)">
+    <g transform="translate(0 0)">
+      <path d="M50 4L96 88H4L50 4Z" fill="none" stroke="#2E6EC5" stroke-width="10" stroke-linejoin="round" />
+      <path d="M50 22L14 82H50V22Z" fill="#2E6EC5" />
+      <path d="M30 82L50 26L70 82H30Z" fill="#C0392B" />
+      <rect x="24" y="78" width="52" height="10" rx="2" fill="#C0392B" />
+    </g>
+    <g transform="translate(120 0)">
+      <text x="0" y="75" fill="#ffffff" font-family="Inter, Arial, sans-serif" font-size="72" font-weight="800" letter-spacing="-3">PRYZMAT</text>
+      <text x="0" y="115" fill="#93c5fd" font-family="Inter, Arial, sans-serif" font-size="22" font-weight="600" letter-spacing="8">BIOURO NIERUCHOMOŚCI</text>
+    </g>
+  </g>
+  <rect x="120" y="292" width="140" height="6" rx="3" fill="#C0392B" />
+  <text x="120" y="360" fill="#d1d5db" font-family="Inter, Arial, sans-serif" font-size="32" letter-spacing="4">Barczewo · Olsztyn · Warmia</text>
+  <g transform="translate(120 440)" fill="#9ca3af" font-family="Inter, Arial, sans-serif" font-size="24" letter-spacing="1.2">
+    <text x="0" y="0">13+ lat doświadczenia</text>
+    <text x="0" y="42">• Prowizja 2,5%</text>
+    <text x="0" y="84">• Bezpłatna wycena</text>
+  </g>
+</svg>

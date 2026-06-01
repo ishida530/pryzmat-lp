@@ -17,40 +17,39 @@ import {
   Layers,
 } from "lucide-react";
 import { COMPANY } from "@/lib/constants";
-import { getListingIds, getListing, mapToOffer } from "@/lib/asari";
+import { getListing, getSimilarListings, getAllListingIds } from "@/lib/db";
 import { ListingDetailSkeleton } from "@/components/sections/ListingDetailSkeleton";
 import { ImageGallery } from "@/components/sections/ImageGallery";
 import { ListingMap } from "@/components/sections/ListingMap";
 import { AgentCard } from "@/components/sections/AgentCard";
 
-export const revalidate = 600;
+export const revalidate = 1800;
+export const dynamic = "force-dynamic";
 
 interface OfferDetailPageProps {
   params: { slug: string };
 }
 
 export async function generateMetadata({ params }: OfferDetailPageProps): Promise<Metadata> {
-  try {
-    const listing = await getListing(Number(params.slug));
-    const offer = mapToOffer(listing);
-    const priceLabel =
-      offer.price > 0
-        ? offer.purpose === "sprzedaz"
-          ? `Cena: ${offer.price.toLocaleString("pl-PL")} zł.`
-          : `Czynsz: ${offer.price.toLocaleString("pl-PL")} zł/mies.`
-        : "Cena do negocjacji.";
-    return createMetadata(
-      offer.title,
-      `${offer.title} — ${offer.area} m² w ${offer.location}. ${priceLabel}`,
-      `/oferty/${params.slug}`
-    );
-  } catch {
+  const offer = await getListing(Number(params.slug));
+  if (!offer) {
     return createMetadata(
       "Oferta nie znaleziona",
       "Szukana oferta nieruchomości nie istnieje.",
       `/oferty/${params.slug}`
     );
   }
+  const priceLabel =
+    offer.price > 0
+      ? offer.purpose === "sprzedaz"
+        ? `Cena: ${offer.price.toLocaleString("pl-PL")} zł.`
+        : `Czynsz: ${offer.price.toLocaleString("pl-PL")} zł/mies.`
+      : "Cena do negocjacji.";
+  return createMetadata(
+    offer.title,
+    `${offer.title} — ${offer.area} m² w ${offer.location}. ${priceLabel}`,
+    `/oferty/${params.slug}`
+  );
 }
 
 function formatPrice(price: number) {
@@ -62,26 +61,10 @@ function formatPrice(price: number) {
 }
 
 async function ListingDetailContent({ slug }: { slug: string }) {
-  let listing;
-  try {
-    listing = await getListing(Number(slug));
-  } catch {
-    notFound();
-  }
+  const offer = await getListing(Number(slug));
+  if (!offer) notFound();
 
-  const offer = mapToOffer(listing);
-
-  const allRefs = await getListingIds();
-  const similarRefs = allRefs
-    .filter((r) => r.id !== listing.id)
-    .slice(0, 3);
-  const similarSettled = await Promise.allSettled(similarRefs.map((r) => getListing(r.id)));
-  const similarOffers = similarSettled
-    .filter(
-      (r): r is PromiseFulfilledResult<Awaited<ReturnType<typeof getListing>>> =>
-        r.status === "fulfilled"
-    )
-    .map((r) => mapToOffer(r.value));
+  const similarOffers = await getSimilarListings(Number(slug), 3);
 
   return (
     <>

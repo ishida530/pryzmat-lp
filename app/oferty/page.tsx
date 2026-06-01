@@ -4,9 +4,10 @@ import { createMetadata } from "@/lib/seo";
 import Image from "next/image";
 import { OffersClient } from "@/components/sections/OffersClient";
 import { OffersSkeleton } from "@/components/sections/OffersSkeleton";
-import { getAllListings, mapToOffer } from "@/lib/asari";
+import { getAllListings } from "@/lib/db";
 
-export const revalidate = 600;
+export const revalidate = 1800;
+export const dynamic = "force-dynamic";
 
 export const metadata: Metadata = createMetadata(
   "Oferty nieruchomości Barczewo i Olsztyn",
@@ -15,9 +16,18 @@ export const metadata: Metadata = createMetadata(
 );
 
 async function OffersServerList() {
-  const listings = await getAllListings();
-  const offers = listings.map(mapToOffer);
-  return <OffersClient offers={offers} />;
+  try {
+    const offers = await getAllListings();
+    return <OffersClient offers={offers} />;
+  } catch (error) {
+    return (
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-16 text-center">
+        <p className="text-lg font-semibold text-brand-navy">
+          Oferty są obecnie niedostępne. Spróbuj ponownie za chwilę.
+        </p>
+      </div>
+    );
+  }
 }
 
 export default function OfertyPage() {

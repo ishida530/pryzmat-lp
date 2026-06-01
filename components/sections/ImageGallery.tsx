@@ -71,16 +71,17 @@ export function ImageGallery({ photoIds, alt }: Props) {
               key={id}
               onClick={() => setCurrent(i)}
               aria-label={`Zdjęcie ${i + 1}`}
-              className={`shrink-0 w-20 h-14 rounded-lg overflow-hidden border-2 transition-all ${
+              className={`relative shrink-0 w-20 h-14 rounded-lg overflow-hidden border-2 transition-all ${
                 i === current
                   ? "border-brand-blue opacity-100"
                   : "border-transparent opacity-55 hover:opacity-100"
               }`}
             >
-              <img
+              <Image
                 src={thumbUrl(id)}
                 alt=""
-                className="w-full h-full object-cover"
+                fill
+                className="object-cover"
               />
             </button>
           ))}

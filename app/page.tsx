@@ -15,7 +15,7 @@ export const metadata: Metadata = {
   description:
     "Biuro nieruchomości PRYZMAT — sprzedaż, wynajem i zarządzanie w Barczewie i Olsztynie. 13 lat doświadczenia, prowizja 2,5%, bezpłatna wycena.",
   openGraph: {
-    images: [{ url: "/opengraph-image", width: 1200, height: 630, alt: "Biuro Nieruchomości PRYZMAT — Barczewo, Olsztyn" }],
+    images: [{ url: "/opengraph-image.svg", width: 1200, height: 630, alt: "Biuro Nieruchomości PRYZMAT — Barczewo, Olsztyn" }],
   },
 };
 
@@ -24,7 +24,7 @@ const localBusinessSchema = {
   "@type": ["LocalBusiness", "RealEstateAgent"],
   name: COMPANY.name,
   description: `Rodzinne biuro nieruchomości z ${COMPANY.yearsActive}-letnim doświadczeniem w Barczewie i Olsztynie. Sprzedaż, wynajem i zarządzanie nieruchomościami.`,
-  image: `${COMPANY.website}/opengraph-image`,
+  image: `${COMPANY.website}/opengraph-image.svg`,
   logo: `${COMPANY.website}/logo.png`,
   address: {
     "@type": "PostalAddress",

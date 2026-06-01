@@ -9,6 +9,7 @@ import { getUsers } from "@/lib/asari";
 import type { AsariUser } from "@/lib/asari";
 
 export const revalidate = 3600;
+export const dynamic = "force-dynamic";
 
 export const metadata: Metadata = createMetadata(
   "Nasz zespół — biuro nieruchomości PRYZMAT Barczewo",

@@ -1,8 +1,10 @@
 "use client";
 
-import { useState, useMemo } from "react";
+import { useState, useMemo, useTransition } from "react";
+import Image from "next/image";
 import Link from "next/link";
-import { SlidersHorizontal, Search, MapPin, Home, ArrowRight } from "lucide-react";
+import { useRouter } from "next/navigation";
+import { SlidersHorizontal, Search, MapPin, Home, ArrowRight, X, Loader2 } from "lucide-react";
 
 export interface Offer {
   id: number;
@@ -54,11 +56,22 @@ function formatPrice(price: number) {
 }
 
 export function OffersClient({ offers }: { offers: Offer[] }) {
+  const router = useRouter();
+  const [isPending, startTransition] = useTransition();
+  const [pendingSlug, setPendingSlug] = useState<string | null>(null);
+
   const [selectedType, setSelectedType] = useState("Wszystkie");
   const [selectedPurpose, setSelectedPurpose] = useState("all");
   const [selectedLocation, setSelectedLocation] = useState("all");
+  const [searchQuery, setSearchQuery] = useState("");
 
-  // Build type and location options dynamically from actual data
+  function navigateTo(slug: string) {
+    setPendingSlug(slug);
+    startTransition(() => {
+      router.push(`/oferty/${slug}`);
+    });
+  }
+
   const typeOptions = useMemo(() => {
     const types = Array.from(new Set(offers.map((o) => o.type))).sort();
     return ["Wszystkie", ...types];
@@ -75,20 +88,58 @@ export function OffersClient({ offers }: { offers: Offer[] }) {
   }, [offers]);
 
   const filtered = useMemo(() => {
+    const q = searchQuery.trim().toLowerCase();
     return offers.filter((o) => {
       if (selectedType !== "Wszystkie" && o.type !== selectedType) return false;
       if (selectedPurpose !== "all" && o.purpose !== selectedPurpose) return false;
       if (selectedLocation !== "all" && o.location !== selectedLocation) return false;
+      if (q && !o.title.toLowerCase().includes(q) && !o.location.toLowerCase().includes(q)) return false;
       return true;
     });
-  }, [offers, selectedType, selectedPurpose, selectedLocation]);
+  }, [offers, selectedType, selectedPurpose, selectedLocation, searchQuery]);
+
+  const hasActiveFilters =
+    selectedType !== "Wszystkie" ||
+    selectedPurpose !== "all" ||
+    selectedLocation !== "all" ||
+    searchQuery !== "";
+
+  function resetFilters() {
+    setSelectedType("Wszystkie");
+    setSelectedPurpose("all");
+    setSelectedLocation("all");
+    setSearchQuery("");
+  }
 
   return (
     <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-10">
 
       {/* Filters */}
       <div className="bg-white rounded-2xl shadow-sm border border-gray-100 p-5 mb-8">
-        <div className="flex flex-col sm:flex-row gap-4 items-start sm:items-center">
+        {/* Search row */}
+        <div className="relative mb-4">
+          <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400 pointer-events-none" />
+          <input
+            type="search"
+            value={searchQuery}
+            onChange={(e) => setSearchQuery(e.target.value)}
+            placeholder="Szukaj po nazwie lub lokalizacji…"
+            className="w-full pl-9 pr-9 py-2.5 border border-gray-200 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-brand-blue text-gray-700 placeholder:text-gray-400"
+            aria-label="Szukaj oferty"
+          />
+          {searchQuery && (
+            <button
+              onClick={() => setSearchQuery("")}
+              className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-600"
+              aria-label="Wyczyść wyszukiwanie"
+            >
+              <X className="w-4 h-4" />
+            </button>
+          )}
+        </div>
+
+        {/* Filter row */}
+        <div className="flex flex-col sm:flex-row gap-3 items-start sm:items-center">
           <div className="flex items-center gap-2 text-gray-500 shrink-0">
             <SlidersHorizontal className="w-4 h-4" />
             <span className="text-sm font-medium">Filtruj:</span>
@@ -101,9 +152,7 @@ export function OffersClient({ offers }: { offers: Offer[] }) {
               aria-label="Rodzaj transakcji"
             >
               {purposeOptions.map((o) => (
-                <option key={o.value} value={o.value}>
-                  {o.label}
-                </option>
+                <option key={o.value} value={o.value}>{o.label}</option>
               ))}
             </select>
             <select
@@ -123,32 +172,37 @@ export function OffersClient({ offers }: { offers: Offer[] }) {
               aria-label="Lokalizacja"
             >
               {locationOptions.map((l) => (
-                <option key={l.value} value={l.value}>
-                  {l.label}
-                </option>
+                <option key={l.value} value={l.value}>{l.label}</option>
               ))}
             </select>
           </div>
-          <button
-            onClick={() => {
-              setSelectedType("Wszystkie");
-              setSelectedPurpose("all");
-              setSelectedLocation("all");
-            }}
-            className="flex items-center gap-2 bg-brand-navy text-white px-4 py-2 rounded-lg text-sm font-semibold hover:bg-blue-900 transition-colors shrink-0"
-          >
-            <Search className="w-4 h-4" />
-            Resetuj filtry
-          </button>
+          {hasActiveFilters && (
+            <button
+              onClick={resetFilters}
+              className="flex items-center gap-1.5 text-gray-500 hover:text-brand-navy text-sm font-medium shrink-0 transition-colors"
+            >
+              <X className="w-3.5 h-3.5" />
+              Resetuj
+            </button>
+          )}
         </div>
       </div>
 
       {/* Results count */}
       <div className="mb-4 flex items-center justify-between">
         <p className="text-gray-500 text-sm">
-          Znaleziono{" "}
-          <strong className="text-brand-navy">{filtered.length}</strong>{" "}
-          {filtered.length === 1 ? "ofertę" : filtered.length < 5 ? "oferty" : "ofert"}
+          {offers.length === 0 ? (
+            "Brak ofert w bazie danych"
+          ) : (
+            <>
+              Znaleziono{" "}
+              <strong className="text-brand-navy">{filtered.length}</strong>{" "}
+              {filtered.length === 1 ? "ofertę" : filtered.length < 5 ? "oferty" : "ofert"}
+              {hasActiveFilters && (
+                <span className="text-gray-400"> (z {offers.length} wszystkich)</span>
+              )}
+            </>
+          )}
         </p>
       </div>
 
@@ -156,38 +210,69 @@ export function OffersClient({ offers }: { offers: Offer[] }) {
       {filtered.length === 0 ? (
         <div className="text-center py-16 bg-white rounded-xl border border-gray-100">
           <Home className="w-10 h-10 text-gray-300 mx-auto mb-3" />
-          <p className="text-gray-500 font-medium">
-            Brak ofert spełniających kryteria
-          </p>
-          <p className="text-gray-400 text-sm mt-1">
-            Zmień filtry lub{" "}
-            <Link href="/kontakt" className="text-brand-blue hover:underline">
-              napisz do nas
-            </Link>{" "}
-            — znajdziemy coś dla Ciebie.
-          </p>
+          {offers.length === 0 ? (
+            <>
+              <p className="text-gray-500 font-medium">Brak aktywnych ofert</p>
+              <p className="text-gray-400 text-sm mt-1">
+                Skontaktuj się z nami —{" "}
+                <Link href="/kontakt" className="text-brand-blue hover:underline">
+                  pomożemy znaleźć nieruchomość
+                </Link>
+                .
+              </p>
+            </>
+          ) : (
+            <>
+              <p className="text-gray-500 font-medium">
+                Brak ofert spełniających kryteria
+              </p>
+              <p className="text-gray-400 text-sm mt-1">
+                Zmień filtry lub{" "}
+                <button onClick={resetFilters} className="text-brand-blue hover:underline">
+                  pokaż wszystkie
+                </button>
+                .
+              </p>
+            </>
+          )}
         </div>
       ) : (
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
-          {filtered.map((offer) => (
+          {filtered.map((offer) => {
+            const isThisPending = isPending && pendingSlug === offer.slug;
+            return (
             <Link
               key={offer.id}
               href={`/oferty/${offer.slug}`}
+              onClick={(e) => {
+                // Let browser handle Ctrl/Cmd/Shift+click and middle-click natively
+                if (e.ctrlKey || e.metaKey || e.shiftKey || e.button === 1) return;
+                e.preventDefault();
+                navigateTo(offer.slug);
+              }}
               className="bg-white rounded-xl border border-gray-100 shadow-sm hover:shadow-md hover:-translate-y-1 transition-all duration-200 overflow-hidden group"
             >
               {/* Image */}
               <div className="h-44 bg-gradient-to-br from-brand-navy/10 to-brand-blue/10 flex items-center justify-center relative overflow-hidden">
                 {offer.thumbnailUrl ? (
                   <>
-                    <img
+                    <Image
                       src={offer.thumbnailUrl}
                       alt={offer.title}
-                      className={`w-full h-full object-cover transition-transform duration-300 ${offer.status === "Active" ? "group-hover:scale-110" : ""}`}
+                      fill
+                      className={`object-cover transition-transform duration-300 ${offer.status === "Active" ? "group-hover:scale-110" : ""} ${isThisPending ? "scale-110 brightness-75" : ""}`}
                     />
                     <div className="absolute inset-0 bg-gradient-to-br from-brand-navy/15 via-transparent to-brand-navy/10 pointer-events-none" />
                   </>
                 ) : (
                   <Home className="w-10 h-10 text-brand-navy/30" />
+                )}
+
+                {/* Loading overlay — visible only on the clicked card, auto-clears when transition ends */}
+                {isThisPending && (
+                  <div className="absolute inset-0 flex items-center justify-center bg-brand-navy/40 backdrop-blur-[1px]">
+                    <Loader2 className="w-8 h-8 text-white animate-spin" />
+                  </div>
                 )}
 
                 {/* Sold / Reserved overlay */}
@@ -245,7 +330,8 @@ export function OffersClient({ offers }: { offers: Offer[] }) {
                 </div>
               </div>
             </Link>
-          ))}
+            );
+          })}
         </div>
       )}
 

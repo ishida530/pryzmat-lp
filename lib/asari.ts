@@ -10,14 +10,15 @@ function buildHeaders(): HeadersInit {
   return { SiteAuth: `${userId}:${token}` };
 }
 
-const delay = (ms: number) => new Promise<void>((r) => setTimeout(r, ms)); // used by 429 retry
+const delay = (ms: number) => new Promise<void>((r) => setTimeout(r, ms));
 
 // Asari Site API: POST with multipart/form-data + SiteAuth header.
-// Retries automatically on 429 (rate limit exceeded).
+// Single retry on 429 with a short back-off — the main rate-limit guard is
+// the adaptive batching in getAllListings, not this retry.
 async function asariPost<T>(
   path: string,
   queryParams?: Record<string, string>,
-  retries = 3
+  retries = 1
 ): Promise<T> {
   const url = new URL(`${BASE_URL}${path}`);
   if (queryParams) {
@@ -35,8 +36,8 @@ async function asariPost<T>(
   });
 
   if (res.status === 429 && retries > 0) {
-    console.warn(`[ASARI] 429 rate limit on ${path}, retrying in 10s… (${retries} left)`);
-    await delay(10_000);
+    console.warn(`[ASARI] 429 rate limit on ${path}, retrying in 5s…`);
+    await delay(5_000);
     return asariPost<T>(path, queryParams, retries - 1);
   }
 
@@ -246,75 +247,105 @@ export function mapToOffer(listing: AsariListing): Offer {
 }
 
 // ---------------------------------------------------------------------------
-// Persistent Data Cache (Next.js unstable_cache)
+// Persistent Data Cache  (Next.js unstable_cache)
 //
-// ASARI documentation: "The data downloaded by API should be saved to a local
-// database. Web pages should display data from database prepared in that way."
+// ASARI docs: "The data downloaded by API should be saved to a local database.
+// Web pages should display data from database prepared in that way."
+// unstable_cache IS that local database — survives server restarts and Vercel
+// cold starts. All definitions MUST be at module level (never inside a function
+// call) to avoid the DYNAMIC_SERVER_USAGE error.
 //
-// unstable_cache IS that local database — it persists across server restarts,
-// Vercel cold starts, and dev HMR reloads. Individual listings are cached by
-// their ID + lastUpdated, so only truly changed listings ever hit the API.
-// React cache() deduplicates within a single render on top of that.
+// Arguments passed to an unstable_cache function are automatically part of the
+// cache key. Passing (id, lastUpdated) means a listing is re-fetched only when
+// ASARI updates it (lastUpdated changes) — otherwise served from cache instantly.
+// React cache() deduplicates the same call within a single render on top.
 // ---------------------------------------------------------------------------
 
-// Each individual listing is cached under a key that includes lastUpdated.
-// When lastUpdated changes in ASARI, the key changes → fresh fetch.
-// When it stays the same → Next.js serves the stored value instantly.
-const fetchListingCached = (id: number, lastUpdated: string) =>
-  unstable_cache(
-    () => asariPost<AsariListing>("/listing", { id: String(id) }),
-    [`listing-${id}-${lastUpdated}`],
-    { revalidate: 600, tags: ["listings"] }
-  )();
-
-// Listing IDs list is cached for 60 s — short enough to pick up new listings
-// quickly, long enough to avoid hammering the API on rapid page navigations.
-const fetchListingIdsCached = unstable_cache(
+// IDs list: revalidated every 5 min — real-estate listings don't change every 60 s.
+const _fetchListingIds = unstable_cache(
   () =>
     asariPost<AsariListingRef[]>("/exportedListingIdList", {
       closedDays: "30",
       blockedDays: "30",
     }),
-  ["listing-ids"],
-  { revalidate: 60, tags: ["listing-ids"] }
+  ["asari-listing-ids"],
+  { revalidate: 300, tags: ["listing-ids"] }
 );
 
-export const getListingIds = cache(fetchListingIdsCached);
+// Individual listing: (id, lastUpdated) both go into the cache key.
+// Changed listing in ASARI → different lastUpdated → automatic cache miss.
+const _fetchListing = unstable_cache(
+  async (id: number, _lastUpdated: string) =>
+    asariPost<AsariListing>("/listing", { id: String(id) }),
+  ["asari-listing"],
+  { revalidate: 600, tags: ["listings"] }
+);
 
-// getListing: used on detail pages. Cached individually by id+lastUpdated via
-// fetchListingCached; React cache() deduplicates within a render.
+// Users / agents list.
+const _fetchUsers = unstable_cache(
+  () => asariPost<AsariUser[]>("/user/list", { active: "1", start: "0", limit: "200" }),
+  ["asari-users"],
+  { revalidate: 3600, tags: ["users"] }
+);
+
+export const getListingIds = cache(_fetchListingIds);
+
 export const getListing = cache(async (id: number): Promise<AsariListing> => {
-  // Fetch the ID list first to get the current lastUpdated for this listing.
-  // Both calls hit Next.js Data Cache — no extra API requests.
   const refs = await getListingIds();
   const ref  = refs.find((r) => r.id === id);
-  if (ref) return fetchListingCached(ref.id, ref.lastUpdated);
-  // Listing not in exported list (e.g. direct URL access) — fetch without cache key
+  // Use lastUpdated-keyed cache when possible; fall back for unlisted IDs.
+  if (ref) return _fetchListing(ref.id, ref.lastUpdated);
   return asariPost<AsariListing>("/listing", { id: String(id) });
 });
 
-// getAllListings: fetches every exported listing.
-// Warm cache → all resolved from Next.js Data Cache instantly, no API calls.
-// Cold cache → all fired in parallel; asariPost retries 429s automatically.
+// ASARI rate limit: 25 req/min, recommended 3-4 s between requests.
+// Firing all listings in parallel causes immediate 429s (observed: 9/12 fail).
+//
+// Strategy: process in batches of BATCH_SIZE. After each batch check how long it
+// took — cache hits resolve in <CACHE_HIT_MS, so no delay is needed. Only real
+// network calls are slow and need the inter-batch pause to stay under the quota.
+//
+// Result:
+//   Warm cache  → each batch ~5-20 ms  → no delay → total <100 ms
+//   Cold cache  → each batch ~1400 ms  → remainder of BATCH_DELAY added → no 429s
+const BATCH_SIZE    = 3;    // concurrent requests per batch (observed safe burst)
+const BATCH_DELAY   = 3500; // ms between batches on network calls (ASARI: 3-4 s)
+const CACHE_HIT_MS  = 150;  // batch faster than this = all cache hits, skip delay
+
 export const getAllListings = cache(async (): Promise<AsariListing[]> => {
   const refs = await getListingIds();
-
-  const settled = await Promise.allSettled(
-    refs.map((ref) => fetchListingCached(ref.id, ref.lastUpdated))
-  );
-
   const results: AsariListing[] = [];
-  for (const r of settled) {
-    if (r.status === "fulfilled") results.push(r.value);
-    else console.error("[ASARI] listing fetch failed:", r.reason);
+
+  for (let i = 0; i < refs.length; i += BATCH_SIZE) {
+    const t0 = performance.now();
+
+    const settled = await Promise.allSettled(
+      refs.slice(i, i + BATCH_SIZE).map((r) => _fetchListing(r.id, r.lastUpdated))
+    );
+    for (const r of settled) {
+      if (r.status === "fulfilled") results.push(r.value);
+      else console.error("[ASARI] listing fetch failed:", r.reason);
+    }
+
+    const batchMs = performance.now() - t0;
+    const hasMore = i + BATCH_SIZE < refs.length;
+
+    // Only throttle after real network calls; cache hits are nearly instant.
+    if (hasMore && batchMs > CACHE_HIT_MS) {
+      await delay(Math.max(0, BATCH_DELAY - batchMs));
+    }
   }
+
   return results;
 });
 
-export const getUsers = cache(
-  unstable_cache(
-    () => asariPost<AsariUser[]>("/user/list", { active: "1", start: "0", limit: "200" }),
-    ["users"],
-    { revalidate: 3600, tags: ["users"] }
-  )
-);
+export const getUsers = cache(_fetchUsers);
+
+// Dla /api/sync — bezpośredni dostęp do _fetchListing(id, lastUpdated)
+// bez pośredniego wywołania getListingIds(). Sync sam zarządza kluczami.
+export async function fetchListingForSync(
+  id: number,
+  lastUpdated: string
+): Promise<AsariListing> {
+  return _fetchListing(id, lastUpdated);
+}
