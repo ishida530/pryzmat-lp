@@ -22,6 +22,7 @@ function LogoMark() {
       alt="PRYZMAT biuro nieruchomości — logo"
       width={140}
       height={60}
+      priority
     />
   );
 }
