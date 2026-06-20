@@ -12,6 +12,20 @@
   }
 
   /* Polish diacritics render correctly with Inter latin-ext subset */
+
+  /* Barczewo Investment Page — Design System */
+  :root {
+    --b-navy:      #1B3A6B;
+    --b-navy-dark: #0f2444;
+    --b-red:       #C0392B;
+    --b-cream:     #f9f7f3;
+    --b-cream-2:   #f2efe8;
+    --b-gold:      #9a7b3a;
+    --b-ink:       #1a1a2e;
+    --b-ink-2:     #2d3250;
+    --b-ink-3:     #7a7d94;
+    --b-line:      #d8d4c8;
+  }
 }
 
 @layer utilities {
@@ -22,4 +36,86 @@
   .section-label {
     @apply text-brand-red text-xs font-bold tracking-widest uppercase;
   }
+
+  /* Barczewo page utilities */
+  .b-section-label {
+    font-size: 0.6875rem;
+    font-weight: 700;
+    letter-spacing: 0.18em;
+    text-transform: uppercase;
+    color: var(--b-gold);
+  }
+
+  .b-gold-line {
+    display: block;
+    width: 2.5rem;
+    height: 1px;
+    background: var(--b-gold);
+  }
+}
+
+/* Barczewo range input custom styling */
+.b-range {
+  -webkit-appearance: none;
+  appearance: none;
+  height: 2px;
+  background: var(--b-line);
+  outline: none;
+  border-radius: 0;
+}
+.b-range::-webkit-slider-thumb {
+  -webkit-appearance: none;
+  appearance: none;
+  width: 18px;
+  height: 18px;
+  border-radius: 50%;
+  background: var(--b-navy);
+  cursor: pointer;
+  border: 2px solid var(--b-gold);
+  transition: background 0.2s;
+}
+.b-range::-webkit-slider-thumb:hover {
+  background: var(--b-gold);
+}
+.b-range::-moz-range-thumb {
+  width: 18px;
+  height: 18px;
+  border-radius: 50%;
+  background: var(--b-navy);
+  cursor: pointer;
+  border: 2px solid var(--b-gold);
+  transition: background 0.2s;
+}
+
+/* Form input for barczewo contact */
+.b-input {
+  width: 100%;
+  padding: 0.75rem 1rem;
+  font-size: 0.9375rem;
+  background: rgba(249, 247, 243, 0.06);
+  border: 1px solid rgba(249, 247, 243, 0.18);
+  border-radius: 2px;
+  color: #f9f7f3;
+  outline: none;
+  transition: border-color 0.2s;
+  appearance: none;
+}
+.b-input::placeholder {
+  color: rgba(249, 247, 243, 0.25);
+}
+.b-input:focus {
+  border-color: rgba(154, 123, 58, 0.7);
+  background: rgba(249, 247, 243, 0.09);
+}
+.b-input option {
+  background: #1B3A6B;
+  color: #f9f7f3;
+}
+
+@keyframes bFadeUp {
+  from { opacity: 0; transform: translateY(24px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+.b-fade-up {
+  animation: bFadeUp 0.6s cubic-bezier(0.16, 1, 0.3, 1) both;
 }
