@@ -63,15 +63,6 @@ const values = [
   },
 ];
 
-const teamMembers = [
-  {
-    name: "Jerzy Sawczuk",
-    role: "Założyciel i agent nieruchomości",
-    bio: "Ponad 11 lat na rynku nieruchomości Warmii i Mazur. Specjalista od wycen i negocjacji. Zna każdy zakamarek Barczewa i Olsztyna.",
-    photoPlaceholder: true,
-  },
-  // REPLACE with actual team members
-];
 
 export default function ONasPage() {
   return (
@@ -82,7 +73,6 @@ export default function ONasPage() {
       />
 
       {/* Header */}
-      {/* REPLACE src with actual office/team photo */}
       <section className="relative overflow-hidden py-20 lg:py-28">
         <Image
           src="https://images.unsplash.com/photo-1560518883-ce09059eeffa?auto=format&fit=crop&w=1920&q=80"
@@ -121,18 +111,14 @@ export default function ONasPage() {
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="grid lg:grid-cols-2 gap-14 items-center">
 
-            <div className="aspect-[4/3] rounded-2xl bg-gradient-to-br from-brand-navy/10 to-brand-blue/15 border border-blue-100 flex items-center justify-center">
-              <div className="text-center px-8">
-                <div className="w-20 h-20 bg-brand-navy/20 rounded-full flex items-center justify-center mx-auto mb-4">
-                  <Users className="w-10 h-10 text-brand-navy/50" />
-                </div>
-                <p className="text-brand-navy/70 font-semibold text-sm">
-                  Biuro Nieruchomości PRYZMAT
-                </p>
-                <p className="text-brand-navy/50 text-xs mt-1">
-                  Barczewo · Olsztyn · Warmia
-                </p>
-              </div>
+            <div className="aspect-[4/3] rounded-2xl overflow-hidden relative">
+              <Image
+                src="/images/pryzmat-miejsce.jpeg"
+                alt="Biuro Nieruchomości PRYZMAT — siedziba w Barczewie"
+                fill
+                className="object-cover object-center"
+                sizes="(max-width: 1024px) 100vw, 50vw"
+              />
             </div>
 
             {/* Text */}
@@ -194,31 +180,6 @@ export default function ONasPage() {
                 </div>
                 <h3 className="font-bold text-brand-navy text-base mb-2">{title}</h3>
                 <p className="text-gray-500 text-sm leading-relaxed">{desc}</p>
-              </div>
-            ))}
-          </div>
-        </div>
-      </section>
-
-      {/* Team */}
-      <section className="py-20 bg-white">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="text-center mb-14">
-            <p className="section-label mb-3">NASZ ZESPÓŁ</p>
-            <h2 className="text-3xl font-extrabold text-brand-navy">
-              Poznaj ludzi za PRYZMAT
-            </h2>
-          </div>
-          <div className="flex justify-center">
-            {teamMembers.map(({ name, role, bio }) => (
-              <div key={name} className="max-w-sm text-center">
-                <div className="w-32 h-32 rounded-full bg-brand-light-blue border-4 border-brand-blue/20 flex items-center justify-center mx-auto mb-5">
-                  {/* REPLACE with actual team member photo */}
-                  <Users className="w-12 h-12 text-brand-navy/40" />
-                </div>
-                <h3 className="font-extrabold text-brand-navy text-xl mb-1">{name}</h3>
-                <p className="text-brand-blue text-sm font-semibold mb-4">{role}</p>
-                <p className="text-gray-500 text-sm leading-relaxed">{bio}</p>
               </div>
             ))}
           </div>

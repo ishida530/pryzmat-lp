@@ -1,4 +1,5 @@
 "use client";
+import Image from "next/image";
 import { COMPANY } from "@/lib/constants";
 import { useInView } from "@/hooks/useInView";
 import { useCountUp } from "@/hooks/useCountUp";
@@ -51,24 +52,16 @@ export function About() {
 
           {/* Photo */}
           <div
-            className={`relative aspect-[4/3] rounded-2xl overflow-hidden bg-gray-200 shadow-lg ${inView ? "animate-fade-in" : "opacity-0"}`}
+            className={`relative aspect-[4/3] rounded-2xl overflow-hidden shadow-lg ${inView ? "animate-fade-in" : "opacity-0"}`}
             style={inView ? { animationDelay: "0ms" } : undefined}
           >
-            <div className="absolute inset-0 flex items-center justify-center bg-gradient-to-br from-brand-navy/20 to-brand-blue/20">
-              <div className="text-center px-8">
-                <div className="w-20 h-20 bg-brand-navy/30 rounded-full flex items-center justify-center mx-auto mb-4">
-                  <svg className="w-10 h-10 text-brand-navy/60" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0z" />
-                  </svg>
-                </div>
-                <p className="text-brand-navy/70 font-semibold text-sm">
-                  Biuro Nieruchomości PRYZMAT
-                </p>
-                <p className="text-brand-navy/50 text-xs mt-1">
-                  Barczewo · Olsztyn · Warmia
-                </p>
-              </div>
-            </div>
+            <Image
+              src="/images/pryzmat-miejsce.jpeg"
+              alt="Biuro Nieruchomości PRYZMAT — Barczewo"
+              fill
+              className="object-cover"
+              sizes="(max-width: 1024px) 100vw, 50vw"
+            />
           </div>
 
           {/* Text */}
