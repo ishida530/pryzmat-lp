@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from "next/server";
 import nodemailer from "nodemailer";
 import { COMPANY } from "@/lib/constants";
 
+
 const TYP_LABELS: Record<string, string> = {
   deweloper:        "Deweloper",
   inwestor_prywatny:"Inwestor prywatny",
@@ -151,7 +152,7 @@ export async function POST(request: NextRequest) {
       // ─── Email do biura ───
       await transporter.sendMail({
         from:    `"Formularz PRYZMAT" <${process.env.SMTP_FROM ?? process.env.SMTP_USER}>`,
-        to:      process.env.SMTP_TO || "biuro@marzdom.pl",
+        to:      process.env.SMTP_TO || COMPANY.email,
         replyTo: body.email || undefined,
         subject,
         html:    buildHtml(body),

@@ -132,9 +132,8 @@ export default function ZarzadzanieNajmemPage() {
               <span className="text-brand-blue">Barczewo i Olsztyn</span>
             </h1>
             <p className="text-gray-300 text-lg leading-relaxed mb-8">
-              Masz mieszkanie do wynajęcia, ale nie masz czasu ani nerwów na
-              zarządzanie najemcami? Zajmiemy się tym w pełni — od ogłoszenia po
-              miesięczny przelew na Twoje konto.
+              Masz mieszkanie do wynajęcia, ale nie masz czasu ani nerwów na zarządzanie najemcami?
+Zajmiemy się tym kompleksowo — od zamieszczenia oferty Twojego mieszkania lub domu na portalach internetowych i społecznościowych - po znalezienie najemcy aż po comiesięczny przelew z najmu na Twoje konto.
             </p>
             <div className="flex flex-col sm:flex-row gap-4">
               <a

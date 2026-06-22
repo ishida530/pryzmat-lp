@@ -1,5 +1,6 @@
 "use client";
 
+import Link from "next/link";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
@@ -96,24 +97,24 @@ export function KontaktSection() {
           <div>
             <p className="b-section-label mb-6 flex items-center gap-3" style={{ color: "#9a7b3a" }}>
               <span className="b-gold-line" />
-              Kontakt
+              Pierwszy krok
             </p>
             <h2
               className="font-playfair mb-6"
               style={{ fontSize: "clamp(2rem, 3.5vw, 2.875rem)", color: "#f9f7f3" }}
             >
-              Porozmawiajmy
+              Jedna rozmowa.
               <br />
-              o szczegółach.
+              Bez zobowiązań.
             </h2>
             <p
               className="text-base mb-10"
               style={{ color: "rgba(249,247,243,0.6)", lineHeight: "1.8", maxWidth: "28rem" }}
             >
-              Wypełnij formularz — oddzwonimy w ciągu 2 godzin w godzinach
-              pracy biura. Każda rozmowa jest poufna. Po przesłaniu formularza
-              otrzymasz natychmiastowy dostęp do pełnej dokumentacji technicznej
-              projektu.
+              Wypełnij formularz lub zadzwoń bezpośrednio do Jerzego Sawczuka.
+              Pierwsza rozmowa trwa 15 minut i odpowie na wszystkie pytania.
+              Bez presji — konkretna rozmowa o konkretnych liczbach.
+              Po wypełnieniu otrzymasz dostęp do pełnej dokumentacji.
             </p>
 
             {/* Contact details */}
@@ -135,6 +136,31 @@ export function KontaktSection() {
 
           {/* Right — form or success */}
           <div>
+            {/* Opcja prosta — zakup samej działki */}
+            <div
+              className="rounded-sm px-6 py-5 mb-8"
+              style={{
+                background: "rgba(249,247,243,0.07)",
+                border: "1px solid rgba(249,247,243,0.15)",
+              }}
+            >
+              <p
+                className="text-xs font-bold tracking-widest uppercase mb-2"
+                style={{ color: "#9a7b3a" }}
+              >
+                Jeśli interesuje Cię tylko zakup działki
+              </p>
+              <p
+                className="text-sm leading-relaxed"
+                style={{ color: "rgba(249,247,243,0.6)" }}
+              >
+                Rozumiemy że nie każdy chce angażować się w projekt budowlany.
+                Jeśli szukasz działki inwestycyjnej z pełnym MPZP
+                w dobrej lokalizacji — ta oferta też jest dla Ciebie.
+                Cena: 1 700 000 zł, do negocjacji.
+              </p>
+            </div>
+
             {!submitted ? (
               <form
                 onSubmit={handleSubmit(onSubmit)}
@@ -183,10 +209,10 @@ export function KontaktSection() {
                 >
                   <select {...register("typ")} className="b-input">
                     <option value="">Wybierz…</option>
-                    <option value="deweloper">Deweloper</option>
                     <option value="inwestor_prywatny">Inwestor prywatny</option>
                     <option value="fundusz">Fundusz inwestycyjny</option>
                     <option value="inne">Inne</option>
+                    <option value="deweloper">Deweloper</option>
                   </select>
                 </Field>
 
@@ -236,7 +262,54 @@ export function KontaktSection() {
           </div>
         </div>
 
-        {/* Pre-sale strip — apartment buyers */}
+        {/* Teczka strip */}
+        <div
+          className="mt-12 pt-10"
+          style={{ borderTop: "1px solid rgba(154,123,58,0.2)" }}
+        >
+          <div className="flex flex-col md:flex-row md:items-center gap-6 md:gap-12">
+            <div className="flex-1">
+              <p
+                className="text-xs font-bold tracking-widest uppercase mb-2"
+                style={{ color: "#9a7b3a" }}
+              >
+                Materiał do pobrania
+              </p>
+              <p
+                className="font-playfair mb-2"
+                style={{ fontSize: "clamp(1.25rem, 2vw, 1.625rem)", color: "#f9f7f3" }}
+              >
+                Teczka inwestycyjna PDF
+              </p>
+              <p
+                className="text-sm"
+                style={{ color: "rgba(249,247,243,0.5)", lineHeight: "1.7", maxWidth: "28rem" }}
+              >
+                7 stron gotowych do wydruku lub wysłania. Pełna analiza finansowa,
+                parametry, argumenty i dane kontaktowe — w jednym pliku.
+              </p>
+            </div>
+            <Link
+              href="/inwestycja-barczewo/teczka"
+              target="_blank"
+              rel="noopener noreferrer"
+              className="flex-shrink-0 inline-flex items-center gap-3 px-8 py-4 font-semibold text-sm tracking-wide transition-opacity hover:opacity-80"
+              style={{
+                background: "rgba(154,123,58,0.15)",
+                color: "#9a7b3a",
+                border: "1px solid rgba(154,123,58,0.35)",
+                letterSpacing: "0.04em",
+              }}
+            >
+              <svg width="14" height="14" viewBox="0 0 14 14" fill="none" aria-hidden="true">
+                <path d="M7 1v8M4 6l3 3 3-3M1 11v1a1 1 0 001 1h10a1 1 0 001-1v-1" stroke="currentColor" strokeWidth="1.4" strokeLinecap="round" strokeLinejoin="round" />
+              </svg>
+              Otwórz teczkę PDF
+            </Link>
+          </div>
+        </div>
+
+      {/* Pre-sale strip — apartment buyers */}
         <div
           className="mt-20 pt-14 grid md:grid-cols-[1fr_auto] gap-10 md:gap-16 items-center"
           style={{ borderTop: "1px solid rgba(154,123,58,0.2)" }}

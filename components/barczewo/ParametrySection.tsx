@@ -27,7 +27,7 @@ export function ParametrySection() {
 
         {/* Big numbers grid */}
         <div className="grid grid-cols-2 md:grid-cols-3 gap-px" style={{ background: "#d8d4c8" }}>
-          <BigStat value="4 290" unit="m²" label="PUM — powierzchnia użytkowa mieszkalna" delay={0} />
+          <BigStat value="4 290" unit="m²" label="Powierzchnia mieszkań do sprzedaży" delay={0} />
           <BigStat value="80"    unit="lok." label="Mieszkań (16 na każdej z 5 kondygnacji)" delay={80} />
           <BigStat value="5"     unit="kond." label="Kondygnacji nadziemnych + garaż podziemny" delay={160} />
           <BigStat value="4 438" unit="m²"  label="Powierzchnia działki (393/11 Barczewo)" delay={240} />
@@ -52,7 +52,7 @@ export function ParametrySection() {
                 className="text-xs font-bold tracking-widest uppercase mt-2"
                 style={{ color: "rgba(249,247,243,0.4)" }}
               >
-                efektywności PUM
+                powierzchni to mieszkania — minimum korytarzy
               </p>
             </div>
             <div
@@ -144,31 +144,20 @@ export function ParametrySection() {
                 className="font-playfair text-xl md:text-2xl leading-snug mb-5"
                 style={{ color: "#f9f7f3" }}
               >
-                Brak ryzyka decyzji WZ.
-              </p>
-              <p
-                className="text-sm leading-relaxed mb-6"
-                style={{ color: "rgba(249,247,243,0.65)", lineHeight: "1.8" }}
-              >
-                Parametry zabudowy są zapisane w miejscowym planie
-                zagospodarowania przestrzennego i nie podlegają arbitralnym
-                decyzjom urzędu. Nie ma ryzyka odmowy, nie ma etapu negocjacji
-                z planistami.
+                Zero ryzyka planistycznego.
               </p>
               <p
                 className="text-sm leading-relaxed"
                 style={{ color: "rgba(249,247,243,0.65)", lineHeight: "1.8" }}
               >
-                Pełny MPZP skraca harmonogram przygotowania projektu
-                o{" "}
-                <span
-                  className="font-semibold"
-                  style={{ color: "#f9f7f3" }}
-                >
+                Parametry zabudowy są zapisane w miejscowym planie
+                i nie zależą od decyzji urzędnika. Nie ma ryzyka odmowy,
+                nie ma etapu negocjacji z planistami.
+                Projekt rusza od razu — bez{" "}
+                <span className="font-semibold" style={{ color: "#f9f7f3" }}>
                   12–18 miesięcy
                 </span>{" "}
-                w porównaniu do działek wymagających decyzji WZ. Wchodzisz
-                od razu do projektu budowlanego.
+                czekania na WZ.
               </p>
 
               {/* Location note */}

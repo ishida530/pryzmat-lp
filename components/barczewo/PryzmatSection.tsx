@@ -3,8 +3,8 @@ import { AnimateIn } from "@/components/ui/AnimateIn";
 const ARGUMENTS = [
   {
     num: "I",
-    title: "Znajomość rynku, której nie można kupić",
-    body: "11 lat w Barczewie i Olsztynie. Każde osiedle, każde tempo sprzedaży, każda transakcja. Znamy kupujących zanim pojawi się reklama — bo przez lata obsługiwaliśmy ich przy zakupie poprzednich mieszkań. Ta sieć nie jest na sprzedaż.",
+    title: "Znamy kupujących zanim ogłosisz budowę.",
+    body: "Przez 11 lat obsługiwaliśmy rodziny kupujące mieszkania w Barczewie i Olsztynie. Wiemy kto szuka kawalerki, kto czeka na trzypokojowe, kto ma kredyt gotowy do uruchomienia. Gdy Twój budynek stanie — lista chętnych już czeka.",
     stat: "11 lat",
     statLabel: "wyłącznie Barczewo i Olsztyn",
   },
@@ -17,8 +17,8 @@ const ARGUMENTS = [
   },
   {
     num: "III",
-    title: "Jeden kontakt przez cały projekt",
-    body: "Nie dział sprzedaży, nie rotacja, nie call center. Jeden dedykowany opiekun projektu — od pierwszej prezentacji do ostatniego aktu notarialnego. Zawsze dostępny, zawsze z pełnym obrazem sytuacji.",
+    title: "Jeden człowiek odpowiada za wszystko.",
+    body: "Jerzy Sawczuk. Nie dział, nie rotacja, nie call center. Jeden człowiek który zna projekt od pierwszego telefonu do ostatniego aktu notarialnego. Numer bezpośredni: +48 607 677 034 — odbiera osobiście.",
     stat: "80",
     statLabel: "mieszkań — jedna odpowiedzialność",
   },
@@ -44,15 +44,16 @@ export function PryzmatSection() {
               className="font-playfair mb-4"
               style={{ fontSize: "clamp(2rem, 3.5vw, 2.875rem)", color: "#1a1a2e" }}
             >
-              Inwestor skupia się na budowie.
+              Inwestor skupia się na zysku.
               <br />
-              <span style={{ color: "#1B3A6B" }}>My na sprzedaży.</span>
+              <span style={{ color: "#1B3A6B" }}>Jerzy Sawczuk na wszystkim innym.</span>
             </h2>
             <div className="space-y-4 mt-1">
               <p className="text-base" style={{ color: "#7a7d94", lineHeight: "1.75" }}>
-                Za tą ofertą stoi Jerzy Sawczuk — założyciel PRYZMAT, 11 lat na rynku
-                Barczewa i Olsztyna. Nie agencja. Człowiek który zna ten rynek
-                z imienia i nazwiska — dosłownie.
+                Za tą ofertą stoi Jerzy Sawczuk — założyciel PRYZMAT,
+                11 lat wyłącznie na rynku Barczewa i Olsztyna.
+                Zna lokalnych wykonawców i dostawców. Wie co budować
+                żeby się sprzedało. I sprzeda to osobiście.
               </p>
               <blockquote
                 className="pl-5 py-1"

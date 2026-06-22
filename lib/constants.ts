@@ -18,14 +18,14 @@ export const COMPANY = {
   phoneDisplay: "+48 503 397 360",
   email: "biuro@marzdom.pl",
   formEmail: "kontakt@marzdom.pl",
-  website: "https://www.pryzmatnieruchomosci.pl", // REPLACE with actual domain
+  website: "https://www.pryzmatnieruchomosci.pl",
   hours: {
     weekdays: "Pon–Pt: 9:00–20:00",
     saturday: "Sob: 10:00–15:00",
     sunday: "Niedz: 9:00-16:00",
   },
   social: {
-    facebook: "https://www.facebook.com/profile.php?id=100063543072260", // REPLACE with actual URL
+    facebook: "https://www.facebook.com/profile.php?id=100063543072260",
   },
   areaServed: ["Barczewo", "Olsztyn", "powiat olsztyński"],
   foundingYear,

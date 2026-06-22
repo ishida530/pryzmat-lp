@@ -22,20 +22,20 @@ export function OfertaSection() {
                 className="space-y-10"
                 style={{ borderLeft: "1px solid #d8d4c8", paddingLeft: "1.5rem" }}
               >
-                <Step number="01" title="Zakup działki">
-                  Działka 393/11 przechodzi na inwestora. Podział geodezyjny
-                  przygotowany — zatwierdzenie w ok. 14 dni. Cena: 1 700 000 zł
-                  (do negocjacji).
+                <Step number="01" title="Ty decydujesz.">
+                  Przeglądasz dokumentację, rozmawiasz z Jerzym, zadajesz pytania.
+                  Gdy jesteś gotowy — podejmujesz decyzję.
+                  Bez pośpiechu, bez presji. Cena działki: 1 700 000 zł, do negocjacji.
                 </Step>
-                <Step number="02" title="Budowa">
-                  Inwestor realizuje budowę zgodnie z gotową koncepcją
-                  architektoniczną — 5 kondygnacji, 80 mieszkań, garaż
-                  podziemny. Koncepcja skraca czas i koszt projektu.
+                <Step number="02" title="Jerzy organizuje budowę.">
+                  Jerzy Sawczuk — 11 lat na rynku, zna lokalnych wykonawców i dostawców.
+                  Inwestor ma kogoś na miejscu który pilnuje jego interesów przez cały czas budowy.
+                  Ty otrzymujesz regularne raporty. Nie musisz znać się na budownictwie.
                 </Step>
-                <Step number="03" title="Sprzedaż przez PRYZMAT">
-                  Biuro PRYZMAT obejmuje wyłączną sprzedaż wszystkich 80
-                  lokali. Prowizja od kupujących — inwestor nie ponosi kosztów
-                  sprzedaży. Jeden kontakt przez cały projekt.
+                <Step number="03" title="Ty odbierasz zysk.">
+                  PRYZMAT sprzedaje wszystkie 80 mieszkań na wyłączność.
+                  Prowizję pobieramy od kupujących — nie od Ciebie.
+                  Gdy ostatnie mieszkanie znajdzie właściciela — odbierasz swój zysk.
                 </Step>
               </div>
             </div>
@@ -61,29 +61,35 @@ export function OfertaSection() {
                 style={{ color: "#2d3250", lineHeight: "1.75" }}
               >
                 <p>
-                  Działka 393/11 przy ulicy Słowackiego w Barczewie nie jest
-                  wystawiona na portalach. Trafiasz tu, bo ktoś nam Cię polecił
-                  lub bo sam szukasz konkretnych możliwości inwestycyjnych —
-                  w obu przypadkach rozmawiamy.
+                  Ta oferta nie jest na portalach nieruchomości.
+                  Nie ma jej na OtoDom ani Gratka.
+                  Trafiasz tu dlatego że sam jej szukałeś — to już mówi coś o Tobie.
                 </p>
                 <p>
-                  Model, który proponujemy, jest rzadki na rynku. Ty wnosisz
-                  kapitał i realizujesz budowę. My bierzemy na siebie całą
-                  sprzedaż — wszystkie 80 mieszkań, wyłącznie, na własną
-                  odpowiedzialność.
+                  Szukamy jednej osoby. Nie funduszu, nie spółki,
+                  nie dewelopera który ma własny dział sprzedaży.
+                  Szukamy kogoś kto ma kapitał, chce żeby pracował,
+                  i rozumie że dobry partner jest wart więcej niż wszystko samemu.
                 </p>
                 <p>
-                  To oznacza, że na etapie budowy masz pełną koncentrację na
-                  harmonogramie i kosztach. Nie zajmujesz się marketingiem, nie
-                  zatrudniasz działu handlowego, nie negocjujesz z indywidualnymi
-                  kupującymi. Skupiasz się na jednej rzeczy: dowozisz budynek.
+                  Jerzy Sawczuk zna się na budowie i zna każdego kupującego
+                  w promieniu 30 kilometrów. To nie slogan —
+                  to 11 lat transakcji w tym konkretnym miejscu.
+                  Inwestor który wejdzie w ten projekt nie jest sam.
                 </p>
-                <p style={{ fontWeight: 500, color: "#1a1a2e" }}>
-                  My robimy resztę.
+                <p
+                  style={{
+                    fontWeight: 600,
+                    color: "#1a1a2e",
+                    fontSize: "clamp(1.125rem, 2vw, 1.375rem)",
+                    lineHeight: "1.5",
+                  }}
+                >
+                  Ty wnosisz kapitał. My wnosimy wszystko inne.
                 </p>
               </div>
 
-              {/* Pull quote */}
+              {/* Pull quote — Jerzy Sawczuk */}
               <blockquote
                 className="mt-10 pl-6 py-1"
                 style={{ borderLeft: "3px solid #9a7b3a" }}

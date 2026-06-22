@@ -148,6 +148,11 @@ export function KalkulatorSection() {
             Dostosuj założenia do swojej strategii. PUM koncepcji: {pln(PUM)} m².
             Kalkulacja nie uwzględnia VAT, CIT ani kosztów finansowania zewnętrznego.
           </p>
+          <p className="text-sm mt-3" style={{ color: "#7a7d94", lineHeight: "1.7" }}>
+            Poniżej możesz sprawdzić potencjalny zysk przy różnych założeniach.
+            Scenariusz &ldquo;Barczewo dziś&rdquo; pokazuje aktualne ceny rynkowe.
+            Scenariusze wyższe uwzględniają rosnące ceny zbliżające się do poziomu Olsztyna.
+          </p>
         </div>
 
         {/* Scenario presets */}
