@@ -14,10 +14,10 @@ const SCENARIOS: Scenario[] = [
 ];
 
 const getPriceHint = (price: number): string => {
-  if (price < 7500) return "📍 Barczewo dziś: 6 900–7 500 zł/m²";
-  if (price < 9000) return "📈 Powyżej rynku Barczewo — wzrost cenowy";
-  if (price <= 9700) return "🏙️ Poziom Olsztyna: 9 000–9 700 zł/m²";
-  return "🚀 Powyżej Olsztyna — scenariusz premium";
+  if (price < 7500) return "Barczewo dziś: 6 900–7 500 zł/m²";
+  if (price < 9000) return "Powyżej rynku Barczewo — wzrost cenowy";
+  if (price <= 9700) return "Poziom Olsztyna: 9 000–9 700 zł/m²";
+  return "Powyżej Olsztyna — scenariusz premium";
 };
 
 function pln(n: number) {

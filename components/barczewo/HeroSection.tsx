@@ -105,10 +105,10 @@ export function HeroSection() {
               color: "#f9f7f3",
             }}
           >
-            Wyłóż kapitał.
+            Wnosisz kapitał.
             <br />
             <span style={{ color: "#ffffff" }}>
-              Jerzy Sawczuk ogarnia resztę.
+              Jerzy Sawczuk koordynuje resztę.
             </span>
           </h1>
 

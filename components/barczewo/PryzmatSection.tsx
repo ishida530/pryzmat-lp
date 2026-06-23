@@ -4,7 +4,7 @@ const ARGUMENTS = [
   {
     num: "I",
     title: "Znamy kupujących zanim ogłosisz budowę.",
-    body: "Przez 11 lat obsługiwaliśmy rodziny kupujące mieszkania w Barczewie i Olsztynie. Wiemy kto szuka kawalerki, kto czeka na trzypokojowe, kto ma kredyt gotowy do uruchomienia. Gdy Twój budynek stanie — lista chętnych już czeka.",
+    body: "Przez 11 lat obsługiwaliśmy rodziny kupujące mieszkania w Barczewie i Olsztynie. Wiemy kto szuka kawalerki, kto czeka na trzypokojowe, kto ma kredyt gotowy do uruchomienia. Gdy Twój budynek stanie — lista zainteresowanych już czeka.",
     stat: "11 lat",
     statLabel: "wyłącznie Barczewo i Olsztyn",
   },

@@ -68,7 +68,7 @@ export default function InwestycjaBarczewoPage() {
           className="flex-1 text-center font-bold py-3 rounded-lg text-sm"
           style={{ background: "#1B3A6B", color: "#fff" }}
         >
-          📞 Zadzwoń do Jerzego
+          Zadzwoń do Jerzego
         </a>
         <a
           href="#kontakt"
