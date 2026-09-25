@@ -7,17 +7,11 @@ import { createMetadata } from "@/lib/seo";
 import { COMPANY } from "@/lib/constants";
 import { getPostBySlug, getAllPosts } from "@/lib/blog";
 import { mdxComponents } from "@/mdx-components";
+import { PILLAR_LABELS } from "@/lib/og-article";
 
 interface ArticleDetailPageProps {
   params: { slug: string };
 }
-
-const PILLAR_LABELS: Record<string, string> = {
-  sprzedaz: "Sprzedaż",
-  najem: "Najem",
-  zakup: "Zakup",
-  rynek_lokalny: "Rynek lokalny",
-};
 
 export async function generateStaticParams() {
   return getAllPosts().map((post) => ({ slug: post.frontmatter.slug }));
@@ -28,7 +22,25 @@ export async function generateMetadata({ params }: ArticleDetailPageProps): Prom
   if (!post) {
     return createMetadata("Artykuł nie znaleziony", "Szukany artykuł poradnika nie istnieje.", `/poradnik/${params.slug}`);
   }
-  return createMetadata(post.frontmatter.title, post.frontmatter.description, `/poradnik/${params.slug}`);
+  const base = createMetadata(post.frontmatter.title, post.frontmatter.description, `/poradnik/${params.slug}`);
+  // Obrazek z app/poradnik/[slug]/opengraph-image.tsx podpina Next automatycznie — nadpisujemy
+  // tylko typ na "article" z datą publikacji, żeby FB/LinkedIn i Google widziały artykuł.
+  const { images: _images, ...openGraph } = base.openGraph ?? {};
+  return {
+    ...base,
+    openGraph: {
+      ...openGraph,
+      type: "article",
+      publishedTime: post.frontmatter.date,
+      authors: [`Zespół ${COMPANY.name}`],
+      section: post.frontmatter.pillar ? PILLAR_LABELS[post.frontmatter.pillar] : undefined,
+    },
+    twitter: { card: "summary_large_image", title: base.title as string, description: post.frontmatter.description },
+  };
+}
+
+function formatDate(iso: string): string {
+  return new Date(iso).toLocaleDateString("pl-PL", { day: "numeric", month: "long", year: "numeric" });
 }
 
 export default async function ArticleDetailPage({ params }: ArticleDetailPageProps) {
@@ -36,9 +48,44 @@ export default async function ArticleDetailPage({ params }: ArticleDetailPagePro
   if (!post) notFound();
 
   const { frontmatter, content } = post;
+  const url = `${COMPANY.website}/poradnik/${frontmatter.slug}`;
+
+  // Linkowanie wewnętrzne: najpierw ten sam filar, potem najnowsze.
+  const related = getAllPosts()
+    .filter((p) => p.frontmatter.slug !== frontmatter.slug)
+    .sort((a, b) => Number(b.frontmatter.pillar === frontmatter.pillar) - Number(a.frontmatter.pillar === frontmatter.pillar))
+    .slice(0, 3);
+
+  const jsonLd = [
+    {
+      "@context": "https://schema.org",
+      "@type": "BlogPosting",
+      headline: frontmatter.title,
+      description: frontmatter.description,
+      datePublished: frontmatter.date,
+      dateModified: frontmatter.date,
+      inLanguage: "pl-PL",
+      mainEntityOfPage: url,
+      url,
+      image: `${url}/opengraph-image`,
+      author: { "@type": "Organization", name: COMPANY.name, url: COMPANY.website },
+      publisher: { "@type": "Organization", name: COMPANY.name, url: COMPANY.website },
+      ...(frontmatter.city ? { about: { "@type": "Place", name: frontmatter.city } } : {}),
+    },
+    {
+      "@context": "https://schema.org",
+      "@type": "BreadcrumbList",
+      itemListElement: [
+        { "@type": "ListItem", position: 1, name: "Strona główna", item: COMPANY.website },
+        { "@type": "ListItem", position: 2, name: "Poradnik", item: `${COMPANY.website}/poradnik` },
+        { "@type": "ListItem", position: 3, name: frontmatter.title, item: url },
+      ],
+    },
+  ];
 
   return (
     <div className="min-h-screen bg-gray-50">
+      <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }} />
 
       {/* Breadcrumb */}
       <div className="bg-white border-b border-gray-100">
@@ -73,14 +120,34 @@ export default async function ArticleDetailPage({ params }: ArticleDetailPagePro
                 )}
               </div>
 
-              <h1 className="text-3xl font-extrabold text-brand-navy mb-6">
+              <h1 className="text-3xl font-extrabold text-brand-navy mb-3">
                 {frontmatter.title}
               </h1>
+              <p className="text-sm text-gray-500 mb-6">
+                <time dateTime={frontmatter.date}>{formatDate(frontmatter.date)}</time>
+                {" · "}Zespół {COMPANY.name}
+              </p>
 
               <div className="max-w-none">
                 <MDXRemote source={content} components={mdxComponents} />
               </div>
             </div>
+
+            {related.length > 0 && (
+              <div className="bg-white rounded-2xl border border-gray-100 shadow-sm p-8 mb-8">
+                <h2 className="text-xl font-bold text-brand-navy mb-4">Zobacz też</h2>
+                <ul className="space-y-3">
+                  {related.map((p) => (
+                    <li key={p.frontmatter.slug}>
+                      <Link href={`/poradnik/${p.frontmatter.slug}`} className="text-brand-blue font-semibold hover:underline">
+                        {p.frontmatter.title}
+                      </Link>
+                      <p className="text-sm text-gray-500">{p.frontmatter.description}</p>
+                    </li>
+                  ))}
+                </ul>
+              </div>
+            )}
 
             <div className="text-center lg:text-left">
               <Link

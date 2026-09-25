@@ -9,9 +9,11 @@
     "lint": "next lint",
     "postbuild": "next-sitemap",
     "seo-agent": "tsx scripts/seo-agent/index.ts",
+    "seo-agent:dry-run": "tsx scripts/seo-agent/dry-run.ts",
     "export-articles": "tsx scripts/export-articles-to-mdx.ts"
   },
   "dependencies": {
+    "@anthropic-ai/sdk": "^0.128.0",
     "@hookform/resolvers": "^3.3.4",
     "@supabase/ssr": "^0.10.3",
     "@supabase/supabase-js": "^2.106.2",

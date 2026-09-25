@@ -46,3 +46,6 @@ Thumbs.db
 .claude/
 
 
+
+# wynik npm run seo-agent:dry-run
+seo-agent-dry-run.md

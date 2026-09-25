@@ -10,6 +10,7 @@ const navLinks = [
   { href: "/oferty", label: "Oferty" },
   { href: "/#uslugi", label: "Usługi" },
   { href: "/zarzadzanie-najmem", label: "Zarządzanie najmem" },
+  { href: "/poradnik", label: "Poradnik" },
   { href: "/o-nas", label: "O nas" },
   { href: "/kontakt", label: "Kontakt" },
 ];

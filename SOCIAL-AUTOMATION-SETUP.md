@@ -1,124 +1,64 @@
-# Blog + social media (Postfly): podsumowanie wdrożenia i instrukcja uruchomienia
+# Blog i social media (Postfly): stan i instrukcja
 
-Podsumowanie sesji z 23.09.2026 (EPIC 1–4). Po jej zakończeniu build i typecheck przeszły w obu repo: `postfly` i `pryzmat`.
+Aktualizacja: 25.09.2026.
 
-## Co zostało zrobione
+## Jak to działa
 
-### Postfly
-- Nowy endpoint `POST /api/external/content-intake`. Przyjmuje artykuł albo ofertę i przez Claude generuje treść posta oraz hashtagi osobno dla każdej platformy.
-- Tworzy posty jako szkice (**DRAFT**) i wysyła podgląd na Telegram z przyciskami **Publikuj / Anuluj** (używa istniejącego bota).
+1. **Artykuł.** Agent SEO (`npm run seo-agent` albo GitHub Actions, co poniedziałek) przechodzi przez pięć kroków:
+   - **Research.** Claude szuka faktów w sieci, ale tylko w zaufanych domenach (`TRUSTED_SOURCE_DOMAINS` w `scripts/seo-agent/config.ts`: gov.pl, ISAP, GUS, NBP, olsztyn.eu i inne). Źródło, którego wyszukiwarka faktycznie nie zwróciła, oraz link do wyszukiwarki zamiast dokumentu są odrzucane.
+   - **Artykuł.** Każdy przepis, stawka czy liczba musi pochodzić z listy faktów i mieć link. Do tego 2–3 linki wewnętrzne. Treść nie może opisywać usług spoza listy (`SERVICES` w `lib/constants.ts`).
+   - **Fact-check.** Niezależny „redaktor” sprawdza artykuł i zgłasza błędy krytyczne oraz drobne. Poprawki robione są maksymalnie dwa razy. Jeśli błędy krytyczne nadal zostają, **PR nie powstaje**. Potem jest jeszcze runda szlifu drobnych uwag (gramatyka, odmiana frazy).
+   - **Twarda blokada placeholderów** w kodzie.
+   - **Sekcja „Źródła”** jest składana przez kod.
+2. **PR i Telegram.** Na bota pryzmatu przychodzi podgląd z przyciskami „Zatwierdź i publikuj” / „Odrzuć”. Podgląd pokazuje też uwagi redaktora i ostrzeżenia SEO. Zatwierdzenie merguje PR, a artykuł pojawia się pod `/poradnik/{slug}`.
+3. **Postfly.** Pryzmat wysyła zgłoszenie do `POST /api/external/content-intake`. Postfly pisze osobny post dla FB, IG i LinkedIn, tworzy szkic i wysyła go na Telegram Postfly („Publikuj” / „Anuluj”).
+4. **Nowe oferty.** `/api/sync` (cron raz dziennie o 4:00 UTC) zgłasza nowe aktywne oferty:
+   - maksymalnie 3 na jeden przebieg,
+   - z pominięciem rezerwacji i lokali w inwestycjach,
+   - z tytułem oczyszczonym z „SPRZEDAM”, CAPS oraz numerów budynku i działki.
 
-### Pryzmat
-- **SEO-agent** pisze artykuły przez Claude (`lib/anthropic-client.ts`, `scripts/seo-agent/lib/claude-client.ts`) zamiast GPT-4o.
-- Zamiast zapisywać artykuł w Supabase, tworzy branch, plik `content/blog/{slug}.mdx` i Pull Request.
-- **Bot Telegram** (`lib/telegram.ts`, wzorowany na code94) pokazuje podgląd artykułu z przyciskami **Zatwierdź / Odrzuć**.
-- **Zatwierdzenie** merguje PR, artykuł pojawia się pod `/poradnik/{slug}` i od razu idzie wywołanie do Postfly (`lib/postfly-client.ts`).
-- **`/api/sync` (Asari)**:
-  - odróżnia nową ofertę od zmienionej,
-  - pomija dzieci inwestycji,
-  - zgłasza nowe aktywne oferty do Postfly i ponawia próbę przy błędzie.
-  - Wymaga migracji `supabase/migrations/0003_listings_social_sync.sql`.
+### Zabezpieczenia postów (w Postfly, działają dla każdej firmy)
+- Każda liczba w poście musi być w danych (oferta, artykuł, opis marki). Jeśli nie ma, model dostaje jedną poprawkę. Gdy dalej się nie zgadza, post nie powstaje.
+- **Gdy AI jest niedostępne, post ofertowy nie powstaje.** Postfly zwraca 503, a pryzmat ponawia przy kolejnej synchronizacji. Dla artykułu powstaje prosty post zastępczy, ale tylko na FB i LinkedIn.
+- Mechanika platform:
+  - FB i LinkedIn: klikalny link w ostatniej linii, z UTM (`utm_source=facebook|instagram|linkedin`).
+  - IG: bez URL, zamiast niego „link w bio”.
+  - Limity hashtagów, a hashtag marki zawsze zostaje.
+- Obrazek artykułu to grafika z tytułem (`/api/og?title=…`). Postfly konwertuje obrazki do JPEG, bo tak wymaga Instagram.
 
-### Świadomie odłożone na później
-- Przypomnienie na Telegramie o szkicach niezatwierdzonych dłużej niż X godzin.
-- LinkedIn jako strona firmowa (na razie tylko profil osobisty i tylko dla bloga).
-- TikTok (poza zakresem).
+### Styl postów
+- **Zasady PRYZMAT per platforma** są w `lib/social-style.ts`. Pryzmat wysyła je z każdym zgłoszeniem jako domyślne.
+- **Ustawienia konta w Postfly** („Konto → Styl pisania na platformy”) mają pierwszeństwo. Po założeniu konta PRYZMAT wklej tam teksty z `lib/social-style.ts`.
 
----
+## Konto PRYZMAT w Postfly (docelowo)
+Postfly jest wielofirmowy: każde konto ma własne konta social, styl i **klucze integracji API**.
+1. Załóż konto PRYZMAT w Postfly. W trybie `APP_MODE=personal` rejestracja jest zamknięta po pierwszym koncie, więc przełącz na `commercial` albo załóż konto przez admina.
+2. W koncie PRYZMAT:
+   - podłącz FB, IG i LinkedIn Pryzmatu,
+   - połącz Telegram,
+   - uzupełnij „Profil konta” i „Styl pisania na platformy”,
+   - w „Integracje API” utwórz klucz.
+3. W Vercelu (projekt `pryzmat-lp`) ustaw `EXTERNAL_CONTENT_SECRET` = ten klucz (`pfk_…`) i zrób redeploy. Od tej chwili szkice trafiają na konto PRYZMAT.
 
-## Krok 0: bez tego reszta nie zadziała
+Do tego czasu działa wspólny sekret, a szkice trafiają na pierwsze (Twoje) konto Postfly.
 
-Podłącz konta social w Postfly (strona na Facebooku, Instagram Business, profil LinkedIn) i przejdź **Meta App Review**. Dopóki go nie ma, Postfly publikuje tylko na kontach testowych.
+## Konfiguracja (jednorazowo)
+- **Zmienne w Vercelu (pryzmat):** `EXTERNAL_CONTENT_SECRET` i `POSTFLY_URL` są ustawione. Resztę (Anthropic, GitHub, Telegram), webhooki i sekrety Actions ustawia skrypt `finish-setup.ps1 -BotToken <token z @BotFather>`.
+- **Bot Telegram pryzmatu:** osobny od bota Postfly (jeden bot = jeden webhook).
+- **Migracja `0003_listings_social_sync.sql` w Supabase:** wykonana.
+- **Kredyty Anthropic:** konto musi mieć środki. Bez nich agent bloga nie ruszy, a Postfly nie napisze postów.
 
----
-
-## Zmienne środowiskowe
-
-### `postfly/.env` (Vercel + lokalnie)
-
-| Zmienna | Skąd wziąć |
-|---|---|
-| `EXTERNAL_CONTENT_SECRET` | Wygeneruj sam (`openssl rand -hex 32`). Musi być **identyczny** jak w pryzmacie. |
-| `ANTHROPIC_API_KEY` | Prawdopodobnie już ustawiony. |
-| `BLOB_READ_WRITE_TOKEN` | Prawdopodobnie już ustawiony (Vercel Blob). |
-
-### `pryzmat/.env.local` (i Vercel)
-
-| Zmienna | Skąd wziąć |
-|---|---|
-| `ANTHROPIC_API_KEY` | console.anthropic.com |
-| `TELEGRAM_BOT_TOKEN` | Nowy bot przez @BotFather albo istniejący, jeśli oba zatwierdzenia mają iść przez jednego bota. |
-| `TELEGRAM_CHAT_ID` | Twój numeryczny chat id, np. z @userinfobot. |
-| `TELEGRAM_WEBHOOK_SECRET` | Wygeneruj sam. Ten sam ciąg podajesz w `setWebhook`. |
-| `GITHUB_TOKEN` | Fine-grained PAT tylko do repo `ishida530/pryzmat-lp`, z uprawnieniami Contents (R/W) i Pull requests (R/W). |
-| `GITHUB_WEBHOOK_SECRET` | Wygeneruj sam. Ten sam ciąg wpisujesz w GitHub → Settings → Webhooks. |
-| `GITHUB_REPO_OWNER` | `ishida530` |
-| `GITHUB_REPO_NAME` | `pryzmat-lp` |
-| `POSTFLY_URL` | Adres wdrożenia Postfly, bez `/` na końcu. |
-| `EXTERNAL_CONTENT_SECRET` | **Identyczny** jak w Postfly. |
-
-### Sekrety GitHub Actions (repo pryzmatu → Settings → Secrets → Actions)
-- `ANTHROPIC_API_KEY`
-- `GITHUB_TOKEN_PAT`: ten sam PAT co wyżej. Workflow celowo używa PAT-a, a nie wbudowanego `GITHUB_TOKEN`; uzasadnienie jest w komentarzu w `.github/workflows/seo-agent.yml`.
-
-### Webhooki (jednorazowo, ręcznie)
-- **GitHub → Settings → Webhooks → Add**
-  - Payload URL: `https://www.pryzmatnieruchomosci.pl/api/telegram/pr-notify`
-  - Content type: `application/json`
-  - Secret: `GITHUB_WEBHOOK_SECRET`
-  - Events: tylko **Pull requests**
-- **Telegram `setWebhook`**:
-  ```
-  curl "https://api.telegram.org/bot<TOKEN>/setWebhook?url=https://www.pryzmatnieruchomosci.pl/api/telegram/webhook&secret_token=<TELEGRAM_WEBHOOK_SECRET>"
-  ```
-
----
-
-## Jak przetestować
-
-### 1. Postfly (Docker musi być uruchomiony)
+## Testowanie
 ```
-npm run docker:up
-npx prisma db push        # albo migrate deploy; doda pola sourceKind/sourceRef
-npx vitest run tests/api/external-content-intake.test.ts   # oczekiwane 7/7 zaliczonych
+npm run seo-agent:dry-run   # research, artykuł i fact-check lokalnie, bez GitHuba (wynik: seo-agent-dry-run.md)
+gh workflow run seo-agent.yml --repo ishida530/pryzmat-lp   # pełny przebieg: PR, Telegram, Postfly
 ```
 
-### 2. Pryzmat: build i typy
-```
-npm install
-npm run build
-```
-
-### 3. Przeniesienie artykułów z Supabase do MDX (jednorazowo, po uzupełnieniu `.env.local`)
-```
-npm run export-articles
-```
-Sprawdź wygenerowane pliki w `content/blog/`, potem zrób commit i push **bezpośrednio na main**. To import istniejących artykułów, więc nie idzie przez PR.
-
-### 4. Cały flow bloga
-```
-npm run seo-agent   # albo workflow_dispatch w GitHub Actions
-```
-Oczekiwany przebieg:
-1. Powstaje PR `blog/{slug}`.
-2. Na Telegram przychodzi podgląd z przyciskami.
-3. Klikasz **Zatwierdź**, PR się merguje i przychodzi „✅ Opublikowano”.
-4. W logach Vercela pryzmatu widać wywołanie do Postfly.
-5. W Postfly (panel albo Telegram) pojawia się nowy szkic posta.
-
-### 5. Flow nowej oferty
-Dodaj nową ofertę w Asari albo poczekaj, aż się pojawi. Potem poczekaj do 30 minut na `/api/sync` albo uruchom go ręcznie:
-```
-POST /api/sync
-Authorization: Bearer <CRON_SECRET>
-```
-W Postfly lub na Telegramie powinien pojawić się szkic ze zdjęciem, ceną i linkiem.
-
-### 6. Brak duplikatów
-Uruchom `/api/sync` drugi raz z rzędu. Drugie zgłoszenie tej samej oferty **nie** powinno przyjść.
-
----
-
-## Historia
-- **26–27.08.2026**: pierwsza wersja SEO-agenta (GPT-4o, zapis do tabeli `articles` w Supabase, migracja `0002_articles.sql`, plan w `scripts/seo-agent/TASKS.md`).
-- **23.09.2026**: przejście na Claude i wzorzec code94 (MDX + PR + zatwierdzanie na Telegramie) oraz integracja z Postfly dla bloga i ofert z Asari.
+## Otwarte sprawy biznesowe (do decyzji właściciela)
+- Zgoda sprzedającego na publikację oferty w social media (klauzula w umowie pośrednictwa i flaga w CRM). Oferty z klauzulą dyskrecji wykluczyć.
+- Wybór pierwszego zdjęcia do posta: bez osób, dokumentów i tablic rejestracyjnych.
+- Reakcja na sprzedaż, wycofanie i zmianę ceny oferty (edycja lub usunięcie posta).
+- „Bezpłatna pomoc kredytowa”: jeśli porównujecie oferty banków sami, potrzebny jest wpis do rejestru KNF. Jeśli robi to partner, trzeba to tak opisywać.
+- Spójność NAP: e-maile w domenie marzdom.pl a marka PRYZMAT. Sprawdzić też godziny otwarcia z wizytówką Google.
+- Na stronie „100% transakcji ubezpieczonych OC”: OC pośrednika jest obowiązkowe, więc przedstawianie go jako wyróżnika to ryzyko zarzutu praktyki wprowadzającej w błąd.
+- Imienny redaktor zatwierdzający artykuły (AI Act art. 50 ust. 4, E-E-A-T).

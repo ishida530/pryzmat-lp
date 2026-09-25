@@ -29,7 +29,8 @@ on:
 jobs:
   generate-article:
     runs-on: ubuntu-latest
-    timeout-minutes: 15
+    # Research + artykuł + fact-check z maks. 2 poprawkami to ~15-30 min wywołań Claude z web search.
+    timeout-minutes: 45
     steps:
       - name: Checkout repo
         uses: actions/checkout@v4

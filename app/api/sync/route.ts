@@ -20,6 +20,7 @@ import { supabase }       from "@/lib/supabase";
 import { getListingIds, fetchListingForSync, mapToOffer } from "@/lib/asari";
 import { notifyPostflyContentIntake } from "@/lib/postfly-client";
 import { COMPANY } from "@/lib/constants";
+import { sanitizeListingTitle, stripAddressNumbers } from "@/lib/social-style";
 
 export const runtime    = "nodejs";
 export const maxDuration = 60; // sekund — wystarczy nawet przy 30 ofertach
@@ -28,6 +29,23 @@ const CRON_SECRET  = process.env.CRON_SECRET;
 const BATCH_SIZE   = 3;
 const BATCH_DELAY  = 3500;
 const CACHE_HIT_MS = 150;
+const MAX_SOCIAL_ANNOUNCEMENTS_PER_RUN = 3;
+
+function isReserved(title: string | null, description: string | null): boolean {
+  return /rezerwacj|zarezerwowan/i.test(`${title ?? ""} ${(description ?? "").slice(0, 300)}`);
+}
+
+// Ustrukturyzowane parametry z bazy (nie z luźnego opisu CRM) — model dostaje je wprost, a
+// strażnik liczb w Postfly akceptuje tylko liczby obecne w danych, więc to one mogą trafić do posta.
+function listingFacts(listing: { area: number | null; rooms: number | null; floor: number | null }): string {
+  return [
+    listing.area ? `Powierzchnia: ${String(listing.area).replace(".", ",")} m²` : null,
+    listing.rooms ? `Pokoje: ${listing.rooms}` : null,
+    listing.floor !== null && listing.floor !== undefined ? `Piętro: ${listing.floor === 0 ? "parter" : listing.floor}` : null,
+  ]
+    .filter(Boolean)
+    .join(" · ");
+}
 
 const delay = (ms: number) => new Promise<void>(r => setTimeout(r, ms));
 
@@ -159,7 +177,7 @@ async function runSync() {
   // trafiają do tego samego zapytania i tej samej pętli retry, bez osobnego rozróżniania.
   const { data: socialCandidates, error: socialCandidatesErr } = await supabase
     .from("listings")
-    .select("id, slug, title, description, image_url, price, location, type, parent_listing_id")
+    .select("id, slug, title, description, image_url, price, location, type, parent_listing_id, area, rooms, floor")
     .eq("status", "Active")
     .is("social_post_synced_at", null);
 
@@ -172,12 +190,18 @@ async function runSync() {
 
   for (const listing of socialCandidates ?? []) {
     if (listing.parent_listing_id) continue; // dziecko inwestycji — pomiń, post idzie tylko dla rodzica
+    // Oferta w ASARI bywa "Active" z dopiskiem REZERWACJA w opisie — ogłaszanie jej jako nowej
+    // byłoby nietrafne. Zostaje nieoznaczona, więc po zdjęciu rezerwacji pójdzie normalnie.
+    if (isReserved(listing.title, listing.description)) continue;
+    // Bezpiecznik: nigdy więcej niż kilka szkiców naraz (np. po imporcie całego katalogu) —
+    // reszta pójdzie przy kolejnych syncach.
+    if (socialAnnounced + socialFailed >= MAX_SOCIAL_ANNOUNCEMENTS_PER_RUN) break;
 
     const result = await notifyPostflyContentIntake({
       type: "listing",
       sourceRef: `asari-${listing.id}`,
-      title: listing.title,
-      excerpt: listing.description ?? "",
+      title: sanitizeListingTitle(listing.title),
+      excerpt: [listingFacts(listing), stripAddressNumbers(listing.description ?? "")].filter(Boolean).join("\n\n"),
       url: `${COMPANY.website}/oferty/${listing.slug}`,
       imageUrl: listing.image_url ?? `${COMPANY.website}/opengraph-image`,
       price: listing.price ?? undefined,

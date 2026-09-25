@@ -28,6 +28,14 @@ function articleUrl(slug: string): string {
   return `${COMPANY.website}/poradnik/${slug}`;
 }
 
+function articleImageUrl(frontmatter: Record<string, unknown>): string {
+  const params = new URLSearchParams();
+  for (const key of ["title", "pillar", "city"] as const) {
+    if (typeof frontmatter[key] === "string") params.set(key, frontmatter[key] as string);
+  }
+  return `${COMPANY.website}/api/og?${params.toString()}`;
+}
+
 function publishedText(slug?: string): string {
   return slug ? `✅ Opublikowano\n${articleUrl(slug)}` : "✅ Opublikowano";
 }
@@ -45,7 +53,9 @@ async function triggerSocialDraft(slug: string, baseRef: string): Promise<void> 
       title: typeof data.title === "string" ? data.title : slug,
       excerpt: typeof data.description === "string" ? data.description : "",
       url: articleUrl(slug),
-      imageUrl: `${COMPANY.website}/opengraph-image`,
+      // Grafika z tytułem artykułu z /api/og (z parametrów, nie z pliku) — działa od razu, choć
+      // deploy z nowym artykułem może jeszcze trwać, a Postfly pobiera obrazek natychmiast.
+      imageUrl: articleImageUrl(data),
       category: typeof data.pillar === "string" ? data.pillar : undefined,
       location: typeof data.city === "string" ? data.city : undefined,
     });

@@ -22,6 +22,25 @@ export interface GeneratedArticle {
   targetKeyword: string;
 }
 
+export interface SourcedFact {
+  claim: string;
+  sourceUrl: string;
+  sourceTitle: string;
+  // Dosłowny fragment ze źródła potwierdzający claim — do ręcznej weryfikacji w PR.
+  quote: string;
+}
+
+export interface ReviewIssue {
+  excerpt: string;
+  problem: string;
+  severity: "blocker" | "minor";
+  fix: string;
+}
+
+export interface FactCheckReport {
+  issues: ReviewIssue[];
+}
+
 export interface GeneratedMeta {
   metaTitle: string;
   metaDescription: string;

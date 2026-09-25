@@ -34,7 +34,10 @@ module.exports = {
           const raw = fs.readFileSync(path.join(blogDir, file), "utf8");
           const { data } = matter(raw);
           if (data.slug) {
-            paths.push(await config.transform(config, `/poradnik/${data.slug}`));
+            const entry = await config.transform(config, `/poradnik/${data.slug}`);
+            // lastmod = data publikacji artykułu, nie czas builda — rzetelny sygnał świeżości dla Google.
+            if (data.date) entry.lastmod = new Date(data.date).toISOString();
+            paths.push(entry);
           }
         }
       }

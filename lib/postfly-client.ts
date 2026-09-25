@@ -3,6 +3,12 @@
 // w Telegramie Postfly. Best-effort: awaria Postfly nigdy nie może zepsuć głównego przepływu
 // (publikacji artykułu / synchronizacji ofert), więc ta funkcja nigdy nie rzuca — zwraca tylko
 // czy się udało, do zalogowania przez wywołującego.
+// Do każdego zgłoszenia dołączane są ustawienia marki: BRAND_CONTEXT (usługi, region, ton) i zasady
+// pisania per platforma (lib/social-style.ts). W Postfly to wartości DOMYŚLNE — ustawienia konta
+// PRYZMAT w panelu Postfly (gdy zostaną uzupełnione) mają pierwszeństwo.
+import { BRAND_CONTEXT } from "./constants";
+import { BRAND_HASHTAG, PLATFORM_GUIDES, SITE_LABEL } from "./social-style";
+
 export type ContentIntakePayload = {
   type: "blog" | "listing";
   sourceRef: string;
@@ -33,7 +39,13 @@ export async function notifyPostflyContentIntake(
         "Content-Type": "application/json",
         Authorization: `Bearer ${secret}`,
       },
-      body: JSON.stringify(payload),
+      body: JSON.stringify({
+        ...payload,
+        brandContext: BRAND_CONTEXT,
+        platformGuides: PLATFORM_GUIDES,
+        brandHashtag: BRAND_HASHTAG,
+        siteLabel: SITE_LABEL,
+      }),
     });
 
     if (!res.ok) {

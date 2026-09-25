@@ -47,5 +47,25 @@ export const PILLARS: Pillar[] = [
 // czytają realni klienci), Haiku do metadanych (ustrukturyzowany, prosty task JSON).
 export const MODEL_CONTENT = "claude-sonnet-5";
 export const MODEL_META = "claude-haiku-4-5-20251001";
+// Weryfikacja faktów (2026-09-25): research i fact-check szukają WYŁĄCZNIE w tych domenach
+// (subdomeny wliczone — "gov.pl" obejmuje isap.sejm.gov.pl, podatki.gov.pl, stat.gov.pl,
+// biznes.gov.pl, knf.gov.pl, uokik.gov.pl, geoportal.gov.pl itd.). Każdy przepis, stawka, kwota
+// i statystyka w artykule musi mieć źródło z tej listy — inaczej fact-check blokuje PR.
+// Dopisuj tylko źródła urzędowe lub instytucjonalne, nigdy portale/blogi poradnikowe.
+export const TRUSTED_SOURCE_DOMAINS = [
+  "gov.pl", // administracja rządowa, ISAP (Dz.U.), GUS, KNF, UOKiK, KAS, geoportal
+  "nbp.pl", // stopy procentowe, raporty o cenach nieruchomości
+  "europa.eu", // prawo UE (EUR-Lex), dyrektywy
+  "krn.org.pl", // Krajowa Rada Notarialna — taksa notarialna, procedury
+  "zbp.pl", // Związek Banków Polskich — raporty AMRON-SARFiN
+  "amron.pl", // ceny transakcyjne (ZBP)
+  "bik.pl", // Biuro Informacji Kredytowej — raporty kredytowe
+  "olsztyn.eu", // Urząd Miasta Olsztyn — MPZP, podatki lokalne, inwestycje
+  "barczewo.pl", // Urząd Miejski w Barczewie
+  "warmia.mazury.pl", // Urząd Marszałkowski — plany regionalne
+];
+export const MAX_RESEARCH_SEARCHES = 8;
+export const MAX_FACT_CHECK_SEARCHES = 5;
+
 export const DEDUP_WINDOW_DAYS = 90;
 export const ARTICLES_PER_RUN = 1;
