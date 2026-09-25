@@ -1,0 +1,52 @@
+# SEO Agent — cykliczny worker generujący szkice artykułów lokalnych.
+#
+# Od 2026-09-23: Claude (nie OpenAI), publikacja jako PR z brancha blog/* (nie wiersz w
+# Supabase) — merge/zatwierdzenie dzieje się przez bota Telegram (app/api/telegram/webhook),
+# odpalanego przez GitHub webhook (app/api/telegram/pr-notify) skonfigurowany ręcznie w
+# Settings → Webhooks (Payload URL: https://www.pryzmatnieruchomosci.pl/api/telegram/pr-notify,
+# Content type: application/json, Secret: GITHUB_WEBHOOK_SECRET, event: "Pull requests").
+#
+# Wymagane sekrety do dodania ręcznie w GitHub → Settings → Secrets and
+# variables → Actions → New repository secret:
+#   - ANTHROPIC_API_KEY   (klucz API Anthropic)
+#   - GITHUB_TOKEN_PAT    (Personal Access Token z uprawnieniami Contents: write,
+#                          Pull requests: write dla TEGO repo — NIE domyślny
+#                          ${{ secrets.GITHUB_TOKEN }}, bo ten wygasa z końcem joba i część
+#                          uprawnień bywa ograniczona zależnie od ustawień organizacji; PAT jest
+#                          też tym samym tokenem, którego używa webhook w Vercel, więc prościej
+#                          mieć jedno źródło prawdy)
+#
+# Harmonogram: poniedziałek 6:00 UTC, 1 artykuł/tydzień (zawsze jako PR do zatwierdzenia —
+# agent nigdy nie publikuje sam). Wspiera też ręczne uruchomienie do testów.
+
+name: SEO Agent
+
+on:
+  schedule:
+    - cron: "0 6 * * 1"
+  workflow_dispatch: {}
+
+jobs:
+  generate-article:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - name: Checkout repo
+        uses: actions/checkout@v4
+
+      - name: Setup Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: npm
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Run SEO agent
+        run: npm run seo-agent
+        env:
+          ANTHROPIC_API_KEY: ${{ secrets.ANTHROPIC_API_KEY }}
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN_PAT }}
+          GITHUB_REPO_OWNER: ${{ github.repository_owner }}
+          GITHUB_REPO_NAME: pryzmat-lp

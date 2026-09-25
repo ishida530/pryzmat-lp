@@ -18,6 +18,8 @@ import { NextResponse }   from "next/server";
 import { revalidateTag }  from "next/cache";
 import { supabase }       from "@/lib/supabase";
 import { getListingIds, fetchListingForSync, mapToOffer } from "@/lib/asari";
+import { notifyPostflyContentIntake } from "@/lib/postfly-client";
+import { COMPANY } from "@/lib/constants";
 
 export const runtime    = "nodejs";
 export const maxDuration = 60; // sekund — wystarczy nawet przy 30 ofertach
@@ -67,6 +69,10 @@ async function runSync() {
   // 4. Pobierz zmienione/nowe z ASARI (batching — nie przekracza rate limit)
   type OfferRow = ReturnType<typeof mapToOffer>;
   const fetched: OfferRow[] = [];
+  // Oferty-dzieci w ramach inwestycji (pole `parentListing` w surowym ASARI) — Offer/mapToOffer
+  // go nie przenosi (niepotrzebne na stronie), więc zbieramy osobno, tylko do reguły "pomiń
+  // dziecko inwestycji" przy zgłaszaniu nowych ofert do Postfly (krok 6b).
+  const parentListingById = new Map<number, number | null>();
 
   for (let i = 0; i < toFetch.length; i += BATCH_SIZE) {
     const t0      = performance.now();
@@ -76,8 +82,12 @@ async function runSync() {
     );
 
     for (const r of settled) {
-      if (r.status === "fulfilled") fetched.push(mapToOffer(r.value));
-      else console.error("[sync] listing fetch failed:", r.reason);
+      if (r.status === "fulfilled") {
+        fetched.push(mapToOffer(r.value));
+        parentListingById.set(r.value.id, r.value.parentListing?.id ?? null);
+      } else {
+        console.error("[sync] listing fetch failed:", r.reason);
+      }
     }
 
     const elapsed = performance.now() - t0;
@@ -118,6 +128,7 @@ async function runSync() {
         features:           offer.features          ?? [],
         agent:              offer.agent             ?? null,
         nested_listings:    offer.nestedListings    ?? null,
+        parent_listing_id:  parentListingById.get(offer.id) ?? null,
         synced_at:          new Date().toISOString(),
       };
     });
@@ -139,6 +150,54 @@ async function runSync() {
     if (cancelErr) throw new Error(`Cancel error: ${cancelErr.message}`);
   }
 
+  // 6b. Zgłoś do Postfly oferty, które czekają na ogłoszenie social media.
+  //
+  // Zapytanie NIEZALEŻNE od `toFetch`/`fetched` z kroku 4 celowo — dzięki temu obejmuje też
+  // ofertę, której poprzednie zgłoszenie do Postfly się nie powiodło (sieć/5xx), NAWET jeśli jej
+  // dane w ASARI się od tamtej pory nie zmieniły (a więc krok 4 by ją pominął jako "skipped").
+  // social_post_synced_at ustawiane wyłącznie po sukcesie — więc "nowa" i "wcześniej nieudana"
+  // trafiają do tego samego zapytania i tej samej pętli retry, bez osobnego rozróżniania.
+  const { data: socialCandidates, error: socialCandidatesErr } = await supabase
+    .from("listings")
+    .select("id, slug, title, description, image_url, price, location, type, parent_listing_id")
+    .eq("status", "Active")
+    .is("social_post_synced_at", null);
+
+  if (socialCandidatesErr) {
+    console.error("[sync] Odczyt kandydatów do zgłoszenia social nie powiódł się:", socialCandidatesErr.message);
+  }
+
+  let socialAnnounced = 0;
+  let socialFailed = 0;
+
+  for (const listing of socialCandidates ?? []) {
+    if (listing.parent_listing_id) continue; // dziecko inwestycji — pomiń, post idzie tylko dla rodzica
+
+    const result = await notifyPostflyContentIntake({
+      type: "listing",
+      sourceRef: `asari-${listing.id}`,
+      title: listing.title,
+      excerpt: listing.description ?? "",
+      url: `${COMPANY.website}/oferty/${listing.slug}`,
+      imageUrl: listing.image_url ?? `${COMPANY.website}/opengraph-image`,
+      price: listing.price ?? undefined,
+      location: listing.location ?? undefined,
+      category: listing.type,
+    });
+
+    if (result.ok) {
+      socialAnnounced++;
+      const { error: markErr } = await supabase
+        .from("listings")
+        .update({ social_post_synced_at: new Date().toISOString() })
+        .eq("id", listing.id);
+      if (markErr) console.error(`[sync] Nie udało się zapisać social_post_synced_at dla ${listing.id}:`, markErr.message);
+    } else {
+      socialFailed++;
+      console.error(`[sync] content-intake nie powiodło się dla oferty ${listing.id}: ${result.error} — spróbuję ponownie przy następnym syncu.`);
+    }
+  }
+
   // 7. Odśwież cache Next.js — tylko gdy coś się zmieniło
   if (fetched.length > 0 || removedIds.length > 0) {
     revalidateTag("listings");
@@ -151,6 +210,8 @@ async function runSync() {
     updated:     fetched.length,
     removed:     removedIds.length,
     skipped:     refs.length - toFetch.length,
+    socialAnnounced,
+    socialFailed,
   };
 }
 
