@@ -1,15 +1,15 @@
-// Migracja jednorazowa (2026-09-23): eksportuje opublikowane artykuły z Supabase `articles` do
+// Migracja jednorazowa (2026-09-23): eksportuje opublikowane artykuły z tabeli `articles` do
 // content/blog/*.mdx — krok 1 przejścia bloga na wzorzec code94 (git + PR + Telegram zamiast
-// Supabase + ręczna zmiana statusu). Supabase NIE jest kasowane po migracji — zostaje jako
-// nieaktywna kopia zapasowa, na wypadek gdyby trzeba było do czegoś wrócić.
+// bazy + ręczna zmiana statusu). Tabela `articles` (od 2026-10 w Neon, skopiowana 1:1 z Supabase
+// przez scripts/migrate-supabase-to-neon.ts) zostaje jako nieaktywna kopia zapasowa.
 //
-// WAŻNE — slug musi zostać identyczny z tym w Supabase, inaczej stracimy pozycje w Google dla
+// WAŻNE — slug musi zostać identyczny z tym w bazie, inaczej stracimy pozycje w Google dla
 // tych artykułów (ten sam URL /poradnik/{slug} musi dalej działać). Skrypt tego nie zmienia.
 //
-// Uruchomienie (lokalnie, z uzupełnionym .env.local): npx tsx scripts/export-articles-to-mdx.ts
+// Uruchomienie: npx tsx --env-file=.env.local scripts/export-articles-to-mdx.ts
 import fs from "fs";
 import path from "path";
-import { supabase } from "../lib/supabase";
+import { sql } from "../lib/neon";
 
 const BLOG_DIR = path.join(process.cwd(), "content", "blog");
 
@@ -50,18 +50,17 @@ function buildFrontmatter(a: DbArticle): string {
 }
 
 async function run(): Promise<void> {
-  const { data, error } = await supabase
-    .from("articles")
-    .select("slug, title, content, meta_description, target_keyword, city, pillar, published_at, created_at")
-    .eq("status", "published");
+  // to_char zamiast surowego timestamptz — buildFrontmatter robi .slice(0, 10) na stringu
+  const articles = (await sql`
+    select slug, title, content, meta_description, target_keyword, city, pillar,
+           to_char(published_at at time zone 'UTC', 'YYYY-MM-DD"T"HH24:MI:SS"Z"') as published_at,
+           to_char(created_at   at time zone 'UTC', 'YYYY-MM-DD"T"HH24:MI:SS"Z"') as created_at
+    from articles
+    where status = 'published'
+  `) as DbArticle[];
 
-  if (error) {
-    throw new Error(`Błąd odczytu z Supabase: ${error.message}`);
-  }
-
-  const articles = (data ?? []) as DbArticle[];
   if (articles.length === 0) {
-    console.log("[export] Brak opublikowanych artykułów w Supabase — nic do zrobienia.");
+    console.log("[export] Brak opublikowanych artykułów w bazie — nic do zrobienia.");
     return;
   }
 
@@ -85,7 +84,7 @@ async function run(): Promise<void> {
     written++;
   }
 
-  console.log(`[export] Zakończono. Zapisano: ${written}, pominięto: ${skipped}, razem w Supabase: ${articles.length}.`);
+  console.log(`[export] Zakończono. Zapisano: ${written}, pominięto: ${skipped}, razem w bazie: ${articles.length}.`);
   console.log("[export] Następny krok: przejrzyj wygenerowane pliki, zacommituj i wypchnij do main (nie przez PR — to jednorazowy import, nie nowy artykuł do recenzji).");
 }
 

@@ -1,5 +1,5 @@
 /**
- * POST /api/sync  — synchronizacja ASARI → Supabase
+ * POST /api/sync  — synchronizacja ASARI → Neon (Postgres)
  *
  * Wywoływany automatycznie przez Vercel Cron co 30 minut.
  * Można też wywołać ręcznie: POST /api/sync z nagłówkiem
@@ -9,14 +9,14 @@
  *  1. Pobierz {id, lastUpdated} z ASARI (1 request)
  *  2. Porównaj z asari_last_updated w DB
  *  3. Pobierz z ASARI tylko nowe/zmienione oferty (batching 3 req / 3.5s)
- *  4. Upsert do Supabase
+ *  4. Upsert do Neon
  *  5. Nieaktywne (usunięte z ASARI) → status = 'Cancelled'
  *  6. revalidateTag("listings") → Next.js odświeża cache stron natychmiast
  */
 
 import { NextResponse }   from "next/server";
 import { revalidateTag }  from "next/cache";
-import { supabase }       from "@/lib/supabase";
+import { sql }            from "@/lib/neon";
 import { getListingIds, fetchListingForSync, mapToOffer } from "@/lib/asari";
 import { notifyPostflyContentIntake } from "@/lib/postfly-client";
 import { COMPANY } from "@/lib/constants";
@@ -47,7 +47,24 @@ function listingFacts(listing: { area: number | null; rooms: number | null; floo
     .join(" · ");
 }
 
+// Wiersz kandydata do ogłoszenia social — numeric (price, area) przychodzi z Neona jako string.
+interface SocialCandidateRow {
+  id: number;
+  slug: string;
+  title: string;
+  description: string | null;
+  image_url: string | null;
+  price: string | null;
+  location: string | null;
+  type: string;
+  parent_listing_id: number | null;
+  area: string | null;
+  rooms: number | null;
+  floor: number | null;
+}
+
 const delay = (ms: number) => new Promise<void>(r => setTimeout(r, ms));
+const errMsg = (err: unknown) => (err instanceof Error ? err.message : String(err));
 
 // ─── Auth ────────────────────────────────────────────────────────────────────
 
@@ -67,14 +84,12 @@ async function runSync() {
   const asariIds = new Set(refs.map(r => r.id));
 
   // 2. Co mamy w DB?
-  const { data: existing, error: dbErr } = await supabase
-    .from("listings")
-    .select("id, asari_last_updated");
-
-  if (dbErr) throw new Error(`DB read error: ${dbErr.message}`);
+  const existing = await sql`select id, asari_last_updated from listings`.catch((err: unknown) => {
+    throw new Error(`DB read error: ${errMsg(err)}`);
+  });
 
   const dbMap = new Map<number, string>(
-    (existing ?? []).map(r => [r.id as number, r.asari_last_updated as string])
+    existing.map(r => [r.id as number, r.asari_last_updated as string])
   );
 
   // 3. Kategoryzacja
@@ -115,7 +130,7 @@ async function runSync() {
     }
   }
 
-  // 5. Upsert do Supabase
+  // 5. Upsert do Neon
   if (fetched.length > 0) {
     const rows = fetched.map(offer => {
       const ref = refs.find(r => r.id === offer.id);
@@ -151,21 +166,32 @@ async function runSync() {
       };
     });
 
-    const { error: upsertErr } = await supabase
-      .from("listings")
-      .upsert(rows, { onConflict: "id" });
+    // Jedno zapytanie dla całej paczki: JSON → wiersze typu `listings`.
+    // UPDATE nadpisuje tylko kolumny obecne w `rows` — social_post_synced_at
+    // zostaje nietknięte.
+    const cols   = Object.keys(rows[0]);
+    const insert = cols.join(", ");
+    const update = cols.filter(c => c !== "id").map(c => `${c} = excluded.${c}`).join(", ");
 
-    if (upsertErr) throw new Error(`Upsert error: ${upsertErr.message}`);
+    await sql.query(
+      `insert into listings (${insert})
+       select ${insert} from jsonb_populate_recordset(null::listings, $1::jsonb)
+       on conflict (id) do update set ${update}`,
+      [JSON.stringify(rows)]
+    ).catch((err: unknown) => {
+      throw new Error(`Upsert error: ${errMsg(err)}`);
+    });
   }
 
   // 6. Nieaktywne oferty → Cancelled
   if (removedIds.length > 0) {
-    const { error: cancelErr } = await supabase
-      .from("listings")
-      .update({ status: "Cancelled", synced_at: new Date().toISOString() })
-      .in("id", removedIds);
-
-    if (cancelErr) throw new Error(`Cancel error: ${cancelErr.message}`);
+    await sql`
+      update listings
+      set status = 'Cancelled', synced_at = now()
+      where id = any(${removedIds}::int[])
+    `.catch((err: unknown) => {
+      throw new Error(`Cancel error: ${errMsg(err)}`);
+    });
   }
 
   // 6b. Zgłoś do Postfly oferty, które czekają na ogłoszenie social media.
@@ -175,20 +201,26 @@ async function runSync() {
   // dane w ASARI się od tamtej pory nie zmieniły (a więc krok 4 by ją pominął jako "skipped").
   // social_post_synced_at ustawiane wyłącznie po sukcesie — więc "nowa" i "wcześniej nieudana"
   // trafiają do tego samego zapytania i tej samej pętli retry, bez osobnego rozróżniania.
-  const { data: socialCandidates, error: socialCandidatesErr } = await supabase
-    .from("listings")
-    .select("id, slug, title, description, image_url, price, location, type, parent_listing_id, area, rooms, floor")
-    .eq("status", "Active")
-    .is("social_post_synced_at", null);
-
-  if (socialCandidatesErr) {
-    console.error("[sync] Odczyt kandydatów do zgłoszenia social nie powiódł się:", socialCandidatesErr.message);
+  let socialCandidates: SocialCandidateRow[] = [];
+  try {
+    socialCandidates = (await sql`
+      select id, slug, title, description, image_url, price, location, type, parent_listing_id, area, rooms, floor
+      from listings
+      where status = 'Active' and social_post_synced_at is null
+    `) as SocialCandidateRow[];
+  } catch (err) {
+    console.error("[sync] Odczyt kandydatów do zgłoszenia social nie powiódł się:", errMsg(err));
   }
 
   let socialAnnounced = 0;
   let socialFailed = 0;
 
-  for (const listing of socialCandidates ?? []) {
+  for (const row of socialCandidates) {
+    const listing = {
+      ...row,
+      price: row.price != null ? Number(row.price) : null,
+      area:  row.area  != null ? Number(row.area)  : null,
+    };
     if (listing.parent_listing_id) continue; // dziecko inwestycji — pomiń, post idzie tylko dla rodzica
     // Oferta w ASARI bywa "Active" z dopiskiem REZERWACJA w opisie — ogłaszanie jej jako nowej
     // byłoby nietrafne. Zostaje nieoznaczona, więc po zdjęciu rezerwacji pójdzie normalnie.
@@ -211,11 +243,11 @@ async function runSync() {
 
     if (result.ok) {
       socialAnnounced++;
-      const { error: markErr } = await supabase
-        .from("listings")
-        .update({ social_post_synced_at: new Date().toISOString() })
-        .eq("id", listing.id);
-      if (markErr) console.error(`[sync] Nie udało się zapisać social_post_synced_at dla ${listing.id}:`, markErr.message);
+      await sql`
+        update listings set social_post_synced_at = now() where id = ${listing.id}
+      `.catch((err: unknown) => {
+        console.error(`[sync] Nie udało się zapisać social_post_synced_at dla ${listing.id}:`, errMsg(err));
+      });
     } else {
       socialFailed++;
       console.error(`[sync] content-intake nie powiodło się dla oferty ${listing.id}: ${result.error} — spróbuję ponownie przy następnym syncu.`);

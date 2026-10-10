@@ -45,7 +45,7 @@ Do tego czasu działa wspólny sekret, a szkice trafiają na pierwsze (Twoje) ko
 ## Konfiguracja (jednorazowo)
 - **Zmienne w Vercelu (pryzmat):** `EXTERNAL_CONTENT_SECRET` i `POSTFLY_URL` są ustawione. Resztę (Anthropic, GitHub, Telegram), webhooki i sekrety Actions ustawia skrypt `finish-setup.ps1 -BotToken <token z @BotFather>`.
 - **Bot Telegram pryzmatu:** osobny od bota Postfly (jeden bot = jeden webhook).
-- **Migracja `0003_listings_social_sync.sql` w Supabase:** wykonana.
+- **Kolumny social (`social_post_synced_at`, `parent_listing_id`):** od 2026-10 w Neon, w `db/schema.sql` (dawna migracja Supabase `0003`).
 - **Kredyty Anthropic:** konto musi mieć środki. Bez nich agent bloga nie ruszy, a Postfly nie napisze postów.
 
 ## Testowanie
