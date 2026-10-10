@@ -15,4 +15,8 @@ if (!url) {
 //
 // Użycie: sql`select * from listings where id = ${id}` (parametry są bezpiecznie
 // bindowane) albo sql.query("select ... $1", [param]) dla dynamicznego SQL.
-export const sql = neon(url);
+//
+// cache: "no-store" — sterownik wysyła zapytania przez fetch(), a Next 14 cache'uje
+// fetch w handlerach GET (np. Vercel Cron → GET /api/sync), co dawało stare dane.
+// Cache stron zapewnia unstable_cache w lib/db.ts, nie fetch.
+export const sql = neon(url, { fetchOptions: { cache: "no-store" } });

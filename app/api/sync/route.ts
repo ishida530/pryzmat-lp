@@ -23,6 +23,7 @@ import { COMPANY } from "@/lib/constants";
 import { sanitizeListingTitle, stripAddressNumbers } from "@/lib/social-style";
 
 export const runtime    = "nodejs";
+export const dynamic    = "force-dynamic";
 export const maxDuration = 60; // sekund — wystarczy nawet przy 30 ofertach
 
 const CRON_SECRET  = process.env.CRON_SECRET;

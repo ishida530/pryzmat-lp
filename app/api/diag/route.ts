@@ -49,7 +49,7 @@ export async function GET() {
   if (dbHost) {
     try {
       const { neon } = await import("@neondatabase/serverless");
-      const sql = neon(databaseUrl);
+      const sql = neon(databaseUrl, { fetchOptions: { cache: "no-store" } });
 
       const [info] = await sql`
         select
