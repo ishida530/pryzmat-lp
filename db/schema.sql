@@ -63,6 +63,12 @@ create index if not exists idx_listings_type    on listings (type);
 create index if not exists idx_listings_purpose on listings (purpose);
 create index if not exists idx_listings_slug    on listings (slug);
 
+-- Kiedy oferta pierwszy raz trafiła do bazy. Posty social tylko dla ofert NOWYCH (decyzja właściciela,
+-- 17.10.2026): oferty istniejące przed tą zmianą mają NULL i nigdy nie są ogłaszane, nowe dostają now()
+-- przy pierwszym insercie (upsert w /api/sync nie nadpisuje tej kolumny).
+alter table listings add column if not exists first_seen_at timestamptz;
+alter table listings alter column first_seen_at set default now();
+
 -- ─── Artykuły (archiwum — blog działa z content/blog/*.mdx) ──────────────────
 -- Przeniesione z Supabase, żeby nie stracić danych. scripts/export-articles-to-mdx.ts
 -- czyta stąd przy eksporcie do MDX.

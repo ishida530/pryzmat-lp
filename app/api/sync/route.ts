@@ -195,7 +195,8 @@ async function runSync() {
     });
   }
 
-  // 6b. Zgłoś do Postfly oferty, które czekają na ogłoszenie social media.
+  // 6b. Zgłoś do Postfly NOWE oferty, które czekają na ogłoszenie social media. Oferty, które były
+  // w bazie przed dodaniem first_seen_at (db/schema.sql), nie są ogłaszane — tylko przyszłe.
   //
   // Zapytanie NIEZALEŻNE od `toFetch`/`fetched` z kroku 4 celowo — dzięki temu obejmuje też
   // ofertę, której poprzednie zgłoszenie do Postfly się nie powiodło (sieć/5xx), NAWET jeśli jej
@@ -208,6 +209,8 @@ async function runSync() {
       select id, slug, title, description, image_url, price, location, type, parent_listing_id, area, rooms, floor
       from listings
       where status = 'Active' and social_post_synced_at is null
+        -- tylko oferty, które pojawiły się po wdrożeniu first_seen_at (stare: NULL — nie ogłaszamy)
+        and first_seen_at is not null
     `) as SocialCandidateRow[];
   } catch (err) {
     console.error("[sync] Odczyt kandydatów do zgłoszenia social nie powiódł się:", errMsg(err));
